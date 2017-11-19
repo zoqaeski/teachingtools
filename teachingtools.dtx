@@ -210,17 +210,56 @@ This work consists of the file  teachingtools.dtx
 % \pkg{teachingtools}.
 %
 %\begin{macro}{
-%  \l_@@_reset_all_tl ,
 %  \l_@@_reset_question_tl        ,
 %  \l_@@_reset_example_tl         ,
+%  \l_@@_reset_all_tl 
 %}
+% The \opt{reset-question} option provides a means for question numbering to be reset
+% at different sectioning \enquote{levels}.  The default is for numbering to be
+% reset at the \enquote{section} level.
+%    \begin{macrocode}
+\newcounter{question}
+\keys_define:nn { teachingtools } {
+  reset-question .default:n = section,
+  reset-question .choices:nn = {
+    part, chapter, section, subsection, subsubsection, paragraph, subparagraph
+  }
+  {
+    \counterwithin*{question}{\l_keys_choice_tl}
+  },
+  reset-question / none .code:n = {
+    \counterwithout*{question}{section}
+  },
+}
+%    \end{macrocode}
+%
+% The \opt{reset-example} option provides a means for example numbering to be reset
+% at different sectioning \enquote{levels}.  The default is for numbering to be
+% not reset.
+%    \begin{macrocode}
+\newcounter{example}
+\keys_define:nn { teachingtools } {
+  reset-example .default:n = none,
+  reset-example .choices:nn = {
+    part, chapter, section, subsection, subsubsection, paragraph, subparagraph
+  }
+  {
+    \counterwithin*{example}{\l_keys_choice_tl}
+  },
+  reset-example / none .code:n = {
+    \counterwithout*{example}{section}
+  },
+}
+%    \end{macrocode}
+%
+%\end{macro}
+%
 % The \opt{reset-all} option provides a means for environment numbering to be reset
 % at different sectioning \enquote{levels}.  The default is for numbering to be
 % set individually for each environment.
 %    \begin{macrocode}
 \keys_define:nn { teachingtools } {
   reset-all .choice:,
-  reset-all .default:n = false,
   reset-all / part .meta:n = {
     reset-question = part,
     reset-example = part
@@ -256,47 +295,11 @@ This work consists of the file  teachingtools.dtx
   reset-all / false .meta:n = {
     reset-question,
     reset-example
-  }
+  },
+  reset-all .default:n = false,
+  reset-all .initial:n = false,
 }
 %    \end{macrocode}
-%
-% The \opt{reset-question} option provides a means for question numbering to be reset
-% at different sectioning \enquote{levels}.  The default is for numbering to be
-% reset at the \enquote{section} level.
-%    \begin{macrocode}
-\keys_define:nn { teachingtools } {
-  reset-question .default:n = section,
-  reset-question .choices:nn = {
-    part, chapter, section, subsection, subsubsection, paragraph, subparagraph
-  }
-  {
-    \counterwithin*{question}{\l_keys_choice_tl}
-  },
-  reset-question / none .code:n = {
-    \counterwithout*{question}{section}
-  },
-}
-%    \end{macrocode}
-%
-% The \opt{reset-example} option provides a means for example numbering to be reset
-% at different sectioning \enquote{levels}.  The default is for numbering to be
-% not reset.
-%    \begin{macrocode}
-\keys_define:nn { teachingtools } {
-  reset-example .default:n = none,
-  reset-example .choices:nn = {
-    part, chapter, section, subsection, subsubsection, paragraph, subparagraph
-  }
-  {
-    \counterwithin*{example}{\l_keys_choice_tl}
-  },
-  reset-example / none .code:n = {
-    \counterwithout*{example}{section}
-  },
-}
-%    \end{macrocode}
-%
-%\end{macro}
 %
 %\subsection{Messages}
 % All of the error and warning messages are defined here in one place to
@@ -340,13 +343,6 @@ This work consists of the file  teachingtools.dtx
 \skip_set_eq:NN \answerafter \questionafter
 \skip_set_eq:NN \exampleafter \questionafter
 \skip_set_eq:NN \noticeafter \questionafter
-%    \end{macrocode}
-%
-% Each environment also has its own counter, which can be set and incremented
-% individually.
-%    \begin{macrocode}
-\newcounter{question}
-\newcounter{example}
 %    \end{macrocode}
 %
 % \subsection{Environments}
@@ -413,14 +409,6 @@ This work consists of the file  teachingtools.dtx
 %
 % \subsection{Loading configuration}
 %
-% Once all the keys have been defined, they should be set to their default
-% values.
-%    \begin{macrocode}
-\keys_set:nn { teachingtools } {
-  reset-all,
-}
-%    \end{macrocode}
-
 % Apply the settings given at load time.
 %    \begin{macrocode}
 \ProcessKeysOptions { teachingtools }
