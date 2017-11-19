@@ -1,4 +1,6 @@
 # Git ignore
 *.log
 *.sty
+*.aux
+*.out
 build/

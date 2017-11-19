@@ -1,0 +1,189 @@
+% vim: ft=tex
+
+% arara: lualatex
+% arara: lualatex
+
+\documentclass{scrartcl}
+
+%% KOMA options
+\KOMAoption{cleardoublepage}{empty}
+\KOMAoption{DIV}{10}
+\KOMAoption{draft}{false}
+\KOMAoption{fontsize}{10pt}
+\KOMAoption{headings}{small}
+\KOMAoption{paper}{a4}
+\KOMAoption{parskip}{half}
+\KOMAoption{twoside}{false}
+\KOMAoption{captions}{signature}
+\KOMAoption{titlepage}{false}
+\KOMAoption{abstract}{false}
+
+\usepackage{etoolbox}
+
+\usepackage{fontspec}
+\defaultfontfeatures{Ligatures=TeX}
+
+\usepackage{teachingtools}
+\ttsetup{
+  % reset-all = false,
+  % reset-question = subsection,
+  % reset-example = section,
+}
+
+%% Penalties
+\hyphenpenalty=2500
+\tolerance=500
+\widowpenalty=1500
+\clubpenalty=1500
+
+\usepackage{hyperref}
+\hypersetup{
+  colorlinks=false,
+  hidelinks}
+\usepackage[all]{hypcap}
+\usepackage[noabbrev,capitalise]{cleveref}
+\labelcrefformat{subfigure}{\textbf{(#2#1#3)}}
+
+\begin{document}
+
+
+\section{A section}
+
+\begin{question}
+The question in a section
+\end{question}
+
+\begin{example}
+    This is an example of the \texttt{example} environment.
+\end{example}
+
+\subsection{A subsection}
+
+\begin{question}
+The question in a subsection
+\end{question}
+
+\begin{example*}
+    This is an example of the \texttt{example*} environment.
+\end{example*}
+
+\begin{question}
+Another question in a subsection
+\end{question}
+
+\begin{example}
+    This is an example of the \texttt{example} environment.
+\end{example}
+
+\subsubsection{A subsubsection}
+
+\begin{question*}
+A starred question in a subsubsection
+\end{question*}
+
+\begin{example}
+    This is an example of the \texttt{example} environment.
+\end{example}
+
+
+\begin{question}
+The question in a subsubsection
+\end{question}
+
+\begin{question}
+Another question in a subsubsection
+\end{question}
+
+\begin{example}
+    This is an example of the \texttt{example} environment.
+\end{example}
+
+\subsubsection{A subsubsection}
+
+\begin{question}
+The question in a subsubsection
+\end{question}
+
+\begin{example}
+    This is an example of the \texttt{example} environment.
+\end{example}
+
+\begin{question}
+Another question in a subsubsection
+\end{question}
+
+\subsection{Another subsection}
+
+\begin{example}
+    This is an example of the \texttt{example} environment.
+\end{example}
+
+\begin{question}
+Another question in a subsection
+\end{question}
+
+\begin{question}
+What is this question?
+\end{question}
+
+\section{Another section}
+
+\begin{question}
+Another question in another section
+\end{question}
+
+\begin{question}
+Another question in another section
+\end{question}
+
+\begin{example}
+    This is an example of the \texttt{example} environment.
+\end{example}
+
+\subsection{A subsection}
+
+\begin{question}
+The question in a subsection
+\end{question}
+
+\begin{question}
+Another question in a subsection
+\end{question}
+
+\begin{example}
+    This is an example of the \texttt{example} environment.
+\end{example}
+
+\begin{question}
+Another question in a subsection
+\end{question}
+
+\subsubsection{A subsubsection}
+
+\begin{question}
+The question in a subsubsection
+\end{question}
+
+\begin{question}
+Another question in a subsubsection
+\end{question}
+
+\begin{example}
+    This is an example of the \texttt{example} environment.
+\end{example}
+
+\subsubsection{A subsubsection}
+
+\begin{question}
+The question in a subsubsection
+\end{question}
+
+\begin{question}
+Another question in a subsubsection
+\end{question}
+
+\begin{example}
+    This is an example of the \texttt{example} environment.
+\end{example}
+
+\end{document}

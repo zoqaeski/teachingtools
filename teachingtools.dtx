@@ -218,42 +218,42 @@ This work consists of the file  teachingtools.dtx
 % at different sectioning \enquote{levels}.  The default is for numbering to be
 % set individually for each environment.
 %   \begin{macrocode}
-\keys_define:nn { teachingtools } {
-  reset-all .choice:,
-  reset-all .default:n = false,
-  reset-all / part .meta:n = {
-    reset-question = part,
-    reset-example = part
-  },
-  reset-all / chapter .meta:n = {
-    reset-question = chapter,
-    reset-example = chapter
-  },
-  reset-all / section .meta:n = {
-    reset-question = section,
-    reset-example = section
-  },
-  reset-all / subsection .meta:n = {
-    reset-question = subsection,
-    reset-example = subsection
-  },
-  reset-all / subsubsection .meta:n = {
-    reset-question = subsubsection,
-    reset-example = subsubsection
-  },
-  reset-all / paragraph .meta:n = {
-    reset-question = paragraph,
-    reset-example = paragraph
-  },
-  reset-all / subparagraph .meta:n = {
-    reset-question = subparagraph,
-    reset-example = subparagraph
-  },
-  reset-all / false .meta:n = {
-    reset-question = section,
-    reset-example = none
-  }
-}
+% \keys_define:nn { teachingtools } {
+%   reset-all .choice:,
+%   reset-all .default:n = false,
+%   reset-all / part .meta:n = {
+%     reset-question = part,
+%     reset-example = part
+%   },
+%   reset-all / chapter .meta:n = {
+%     reset-question = chapter,
+%     reset-example = chapter
+%   },
+%   reset-all / section .meta:n = {
+%     reset-question = section,
+%     reset-example = section
+%   },
+%   reset-all / subsection .meta:n = {
+%     reset-question = subsection,
+%     reset-example = subsection
+%   },
+%   reset-all / subsubsection .meta:n = {
+%     reset-question = subsubsection,
+%     reset-example = subsubsection
+%   },
+%   reset-all / paragraph .meta:n = {
+%     reset-question = paragraph,
+%     reset-example = paragraph
+%   },
+%   reset-all / subparagraph .meta:n = {
+%     reset-question = subparagraph,
+%     reset-example = subparagraph
+%   },
+%   reset-all / false .meta:n = {
+%     reset-question = section,
+%     reset-example = none
+%   }
+% }
 %   \end{macrocode}
 %
 % The \opt{reset-question} option provides a means for question numbering to be reset
@@ -261,7 +261,7 @@ This work consists of the file  teachingtools.dtx
 % reset at the \enquote{section} level.
 %   \begin{macrocode}
 \keys_define:nn { teachingtools } {
-  reset-question .default:n = none,
+  reset-question .default:n = section,
   reset-question .choices:nn = {
     part, chapter, section, subsection, subsubsection, paragraph, subparagraph
   }
