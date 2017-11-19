@@ -1,0 +1,211 @@
+% \iffalse meta-comment
+%<*internal>
+\iffalse
+%</internal>
+%<*readme>
+teachingtools - Environments and tools for teaching materials
+===============================================================
+
+Teaching materials, such as lecture notes, tutorials, and textbooks often
+require worked examples and questions for students to learn from.  This package
+provides a set of environments suitable to typeset question/answer pairs,
+examples, and notes.
+
+Installation
+------------
+
+The package is supplied in `dtx` format and as a pre-extracted zip file,
+`teachingtools.tds.zip`. The later is most convenient for most users: simply
+unzip this in your local texmf directory . If you want to unpack the `.dtx`
+yourself, running `tex teachingtools.dtx` will extract the package whereas
+`latex teachingtools.dtx` will extract it and also typeset the documentation.
+
+The package requires LaTeX3 support as provided in the `l3kernel` and
+`l3packages` bundles. Both of these are available on
+[CTAN](http://www.ctan.org/) as ready-to-install zip files.  Suitable versions
+are available in MiKTeX 2.9 and TeX Live 2015 (updating the relevant packages
+online may be necessary).  LaTeX3, and so `teachingtools`, requires the e-TeX
+extensions: these are available on all modern TeX systems.
+%</readme>
+%<*internal>
+\fi
+\def\nameofplainTeX{plain}
+\ifx\fmtname\nameofplainTeX\else
+  \expandafter\begingroup
+\fi
+%</internal>
+%<*install>
+\input l3docstrip.tex
+\keepsilent
+\askforoverwritefalse
+\preamble
+---------------------------------------------------------------
+The teachingtools package --- Environments and tools for teaching materials
+Maintained by Robbie Smith
+E-mail: zoqaeski AT gmail DOT com
+Released under the LaTeX Project Public License v1.3c or later
+See http://www.latex-project.org/lppl.txt
+---------------------------------------------------------------
+
+\endpreamble
+\postamble
+Copyright (C) 2017 by
+  Robbie Smith <zoqaeski AT gmail DOT com>
+
+It may be distributed and/or modified under the conditions of
+the LaTeX Project Public License (LPPL), either version 1.3c of
+this license or (at your option) any later version.  The latest
+version of this license is in the file:
+   http://www.latex-project.org/lppl.txt
+
+This work is "maintained" (as per LPPL maintenance status) by
+  Robbie Smith.
+
+This work consists of the file  teachingtools.dtx
+          and the derived files teachingtools.pdf,
+                                teachingtools.sty and
+                                teachingtools.ins.
+\endpostamble
+\usedir{tex/latex/teachingtools}
+\generate{
+  \file{\jobname.sty}{\from{\jobname.dtx}{package}}
+}
+%</install>
+%<install>\endbatchfile
+%<*internal>
+\usedir{source/latex/siunitx}
+\generate{
+  \file{\jobname.ins}{\from{\jobname.dtx}{install}}
+}
+\nopreamble\nopostamble
+\usedir{doc/latex/siunitx}
+\generate{
+  \file{README.md}{\from{\jobname.dtx}{readme}}
+}
+\ifx\fmtname\nameofplainTeX
+  \expandafter\endbatchfile
+\else
+  \expandafter\endgroup
+\fi
+%</internal>
+%<*driver|package>
+\RequirePackage{expl3}[2015/09/11]
+\RequirePackage{xparse}
+%</driver|package>
+%<*driver>
+\documentclass{l3doc}
+%\DisableImplementation
+\begin{document}
+  \DocInput{\jobname.dtx}
+\end{document}
+%</driver>
+% \fi
+%\begin{implementation}
+%
+%\section{Implementation}
+%
+%    \begin{macrocode}
+%<*package>
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+%<@@=teachingtools>
+%    \end{macrocode}
+%
+%\subsection{Preliminaries}
+%
+% The usual preliminaries.
+%    \begin{macrocode}
+\ProvidesExplPackage {teachingtools} {2017/11/18} {0.1}
+  {Environments and tools for teaching materials}
+%    \end{macrocode}
+%
+% This package depends on recent versions of the \pkg{l3kernel}. 
+%    \begin{macrocode}
+\@ifpackagelater { expl3 } { 2015/11/15 }
+  { }
+  {
+    \PackageError { teachingtools } { Support~package~expl3~too~old }
+      {
+        You~need~to~update~your~installation~of~the~bundles~'l3kernel'~and~
+        'l3packages'.\MessageBreak
+        Loading~teachingtools~will~abort!
+      }
+    \tex_endinput:D
+  }
+%    \end{macrocode}
+% Now load the support packages. \pkg{chngcntr} is required to modify counters
+% while they're in use, and \pkg{enumitem} provides convenience macros for
+% modifing lists.
+%    \begin{macrocode}
+\RequirePackage{ l3keys2e , chngcntr , enumitem }
+%    \end{macrocode}
+%
+% This package defines a few environments, of which 
+
+
+
+\keys_define:nn { teachingtools } {
+  reset-at .choice:,
+  reset-at .default:n = section,
+  reset-at / part .code:n = {
+    \counterwithin*{question}{part}
+  },
+  reset-at / chapter .code:n = {
+    \counterwithin*{question}{chapter}
+  },
+  reset-at / section .code:n = {
+    \counterwithin*{question}{section}
+  },
+  reset-at / subsection .code:n = {
+    \counterwithin*{question}{subsection}
+  },
+  reset-at / subsubsection .code:n = {
+    \counterwithin*{question}{subsubsection}
+  },
+  reset-at / paragraph .code:n = {
+    \counterwithin*{question}{paragraph}
+  },
+  reset-at / subparagraph .code:n = {
+    \counterwithin*{question}{subparagraph}
+  },
+  reset-at / none .code:n = {
+    \counterwithout*{question}{section}
+  },
+
+}
+
+\newcounter{question}
+\newcounter{example}
+
+\newlength{\questionbeforeskip}
+\newlength{\questionafterskip}
+\setlength{\questionbeforeskip}{1.0ex plus -1ex minus -0.25ex}
+\setlength{\questionafterskip}{1ex plus 0.25ex}
+\newlength{\answerskip}
+\setlength{\answerskip}{0.25ex plus -0.125ex minus -0.125ex}
+
+\addtotoclist{loq}
+\newcommand{\listofloqname}{List~of~Questions}
+\newcommand{\listofquestions}{\listoftoc{loq}}
+\setuptoc{loq}{leveldown}
+
+\NewDocumentEnvironment { question } { s } {
+  \refstepcounter{question}
+  {\par\vspace\questionbeforeskip{\bfseries Question~\thequestion.}\par}
+  \begin{itshape}
+}
+{\end{itshape}\par\vspace\questionafterskip}
+
+%\begin{macro}{\ttsetup}
+% The set up macro simply moves to the correct path and executes
+% whatever has been passed.
+%    \begin{macrocode}
+\NewDocumentCommand \ttsetup { m } {
+  \keys_set:nn { teachingtools } {#1}
+}
+%    \end{macrocode}
+%\end{macro}
+
+\ProcessKeysOptions { teachingtools }
+\endinput
