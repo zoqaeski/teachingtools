@@ -160,64 +160,246 @@ This work consists of the file  teachingtools.dtx
 \RequirePackage{ l3keys2e , chngcntr , enumitem }
 %    \end{macrocode}
 %
-% This package defines a few environments, of which 
-
-
-
+%\begin{macro}{
+%  \@@_error:nxx ,
+%  \@@_error:nx  ,
+%  \@@_error:n
+%}
+%\begin{macro}{\l_@@_error_bool}
+% Some general-purpose functions for throwing errors are defined next.
+%
+%    \begin{macrocode}
+\cs_new_protected:Npn \@@_error:nxx #1#2#3 {
+  \bool_set_true:N \l_@@_error_bool
+  \msg_error:nnxx { teachingtools } {#1} {#2} {#3}
+}
+\cs_new_protected:Npn \@@_error:nx #1#2 {
+  \@@_error:nxx {#1} {#2} { }
+}
+\cs_new_protected:Npn \@@_error:n #1 {
+  \@@_error:nxx {#1} { } { }
+}
+\bool_new:N \l_@@_error_bool
+%    \end{macrocode}
+%\end{macro}
+%\end{macro}
+%
+%\begin{macro}{\l_@@_key_tl}
+% Unknown options should raise an \pkg{teachingtools}-specific error message.
+%    \begin{macrocode}
+\tl_new:N  \l_@@_key_tl
 \keys_define:nn { teachingtools } {
-  reset-at .choice:,
-  reset-at .default:n = section,
-  reset-at / part .code:n = {
-    \counterwithin*{question}{part}
+  unknown .code:n = {
+    \msg_error:nnx { teachingtools } { unknown-option }
+    { \exp_not:V \l_keys_key_tl }
+  }
+}
+\AtBeginDocument {
+  \keys_define:nn { teachingtools } {
+    unknown .code:n = {
+      \msg_error:nnx { teachingtools } { unknown-option }
+      { \exp_not:V \l_keys_key_tl }
+    }
+  }
+}
+%    \end{macrocode}
+%\end{macro}
+%
+% \subsection{Options}
+% The following options are provided to control the behaviour of
+% \pkg{teachingtools}.
+%
+%\begin{macro}{
+%  \l_@@_reset_all_tl ,
+%  \l_@@_reset_question_tl        ,
+%  \l_@@_reset_example_tl         ,
+%}
+% The \opt{reset-all} option provides a means for environment numbering to be reset
+% at different sectioning \enquote{levels}.  The default is for numbering to be
+% set individually for each environment.
+%   \begin{macrocode}
+\keys_define:nn { teachingtools } {
+  reset-all .choice:,
+  reset-all .default:n = false,
+  reset-all / part .meta:n = {
+    reset-question = part,
+    reset-example = part
   },
-  reset-at / chapter .code:n = {
-    \counterwithin*{question}{chapter}
+  reset-all / chapter .meta:n = {
+    reset-question = chapter,
+    reset-example = chapter
   },
-  reset-at / section .code:n = {
-    \counterwithin*{question}{section}
+  reset-all / section .meta:n = {
+    reset-question = section,
+    reset-example = section
   },
-  reset-at / subsection .code:n = {
-    \counterwithin*{question}{subsection}
+  reset-all / subsection .meta:n = {
+    reset-question = subsection,
+    reset-example = subsection
   },
-  reset-at / subsubsection .code:n = {
-    \counterwithin*{question}{subsubsection}
+  reset-all / subsubsection .meta:n = {
+    reset-question = subsubsection,
+    reset-example = subsubsection
   },
-  reset-at / paragraph .code:n = {
-    \counterwithin*{question}{paragraph}
+  reset-all / paragraph .meta:n = {
+    reset-question = paragraph,
+    reset-example = paragraph
   },
-  reset-at / subparagraph .code:n = {
-    \counterwithin*{question}{subparagraph}
+  reset-all / subparagraph .meta:n = {
+    reset-question = subparagraph,
+    reset-example = subparagraph
   },
-  reset-at / none .code:n = {
+  reset-all / false .meta:n = {
+    reset-question = section,
+    reset-example = none
+  }
+}
+%   \end{macrocode}
+%
+% The \opt{reset-question} option provides a means for question numbering to be reset
+% at different sectioning \enquote{levels}.  The default is for numbering to be
+% reset at the \enquote{section} level.
+%   \begin{macrocode}
+\keys_define:nn { teachingtools } {
+  reset-question .default:n = none,
+  reset-question .choices:nn = {
+    part, chapter, section, subsection, subsubsection, paragraph, subparagraph
+  }
+  {
+    \counterwithin*{question}{\l_keys_choice_tl}
+  },
+  reset-question / none .code:n = {
     \counterwithout*{question}{section}
   },
-
 }
+%   \end{macrocode}
+%
+% The \opt{reset-example} option provides a means for example numbering to be reset
+% at different sectioning \enquote{levels}.  The default is for numbering to be
+% not reset.
+%   \begin{macrocode}
+\keys_define:nn { teachingtools } {
+  reset-example .default:n = none,
+  reset-example .choices:nn = {
+    part, chapter, section, subsection, subsubsection, paragraph, subparagraph
+  }
+  {
+    \counterwithin*{example}{\l_keys_choice_tl}
+  },
+  reset-example / none .code:n = {
+    \counterwithout*{example}{section}
+  },
+}
+%   \end{macrocode}
+%\end{macro}
+%\end{macro}
 
+
+
+%
+%\subsection{Messages}
+% All of the error and warning messages are defined here in one place to
+% simplify things.
+%
+%    \begin{macrocode}
+\msg_new:nnnn { teachingtools } { unknown-option }
+  { Unknown~option~'#1'. }
+  {
+    The~option~'#1'~is~not~known~by~teachingtools:
+    perhaps~it~is~spelled~incorrectly.
+  }
+%    \end{macrocode}
+%
+% \subsection{Dimensions and Counters}
+% A number of dimensions and lengths are used internally to define spacing
+% around each environment, and counters are used to ensure that the environments
+% can be sequentially numbered.
+%
+% Each environment has its own skip length, initially set to the value of that
+% for the \cs{question} environment.
+%   \begin{macrocode}
+\skip_new:N \questionbefore
+\skip_new:N \questionafter
+\skip_new:N \answerbefore
+\skip_new:N \answerafter
+\skip_new:N \examplebefore
+\skip_new:N \exampleafter
+\skip_new:N \noticebefore
+\skip_new:N \noticeafter
+%
+\skip_set:Nn \questionbefore { 1.0ex plus -1ex minus -0.25ex }
+\skip_set:Nn \questionafter { 1ex plus 0.25ex }
+%
+\skip_set_eq:NN \answerbefore \questionbefore
+\skip_set_eq:NN \examplebefore \questionbefore
+\skip_set_eq:NN \noticebefore \questionbefore
+%
+\skip_set_eq:NN \answerafter \questionafter
+\skip_set_eq:NN \exampleafter \questionafter
+\skip_set_eq:NN \noticeafter \questionafter
+%   \end{macrocode}
+%
+% Each environment also has its own counter, which can be set and incremented
+% individually.
+%   \begin{macrocode}
 \newcounter{question}
 \newcounter{example}
-
-\newlength{\questionbeforeskip}
-\newlength{\questionafterskip}
-\setlength{\questionbeforeskip}{1.0ex plus -1ex minus -0.25ex}
-\setlength{\questionafterskip}{1ex plus 0.25ex}
-\newlength{\answerskip}
-\setlength{\answerskip}{0.25ex plus -0.125ex minus -0.125ex}
+%   \end{macrocode}
+%
+% \subsection{Environments}
+% This package defines a number of environments for teaching materials.  
+%
 
 \addtotoclist{loq}
 \newcommand{\listofloqname}{List~of~Questions}
 \newcommand{\listofquestions}{\listoftoc{loq}}
 \setuptoc{loq}{leveldown}
 
+%\begin{environment}{question}
+% The \cs{question} environment is used to create a list of questions.  The
+% starred version is unnumbered and does not increment the question counter.
+%   \begin{macrocode}
 \NewDocumentEnvironment { question } { s } {
-  \refstepcounter{question}
-  {\par\vspace\questionbeforeskip{\bfseries Question~\thequestion.}\par}
+  \par\vspace\questionbefore
+  \IfBooleanTF #1 
+    { { \bfseries Question.\par } }
+    {
+      \refstepcounter{question}
+      {\bfseries Question~\thequestion.\par}
+    }
   \begin{itshape}
 }
-{\end{itshape}\par\vspace\questionafterskip}
-
+{\end{itshape}\par\vspace\questionafter}
+\cs_new:cpn {question*} {\question*}
+\cs_new_eq:cN {endquestion*} \endquestion
+%   \end{macrocode}
+%\end{environment}
+%
+%\begin{environment}{example}
+% The \cs{example} environment is used to create a list of examples.  The
+% starred version is unnumbered and does not increment the example counter.
+%   \begin{macrocode}
+\NewDocumentEnvironment { example } { s } {
+  \par\vspace\examplebefore
+  \IfBooleanTF #1 
+    { { \bfseries Example.\par } }
+    {
+      \refstepcounter{example}
+      {\bfseries Example~\theexample.\par}
+    }
+}
+{\par\vspace\exampleafter}
+\cs_new:cpn {example*} {\example*}
+\cs_new_eq:cN {endexample*} \endexample
+%   \end{macrocode}
+%\end{environment}
+%
+% \subsection{Document macros}
+%
+% The user document macros are all collected together here for ease.
+%
 %\begin{macro}{\ttsetup}
-% The set up macro simply moves to the correct path and executes
+% The set-up macro simply moves to the correct path and executes
 % whatever has been passed.
 %    \begin{macrocode}
 \NewDocumentCommand \ttsetup { m } {
@@ -225,9 +407,17 @@ This work consists of the file  teachingtools.dtx
 }
 %    \end{macrocode}
 %\end{macro}
-
+%
+% \subsection{Loading configuration}
+%
+% Apply the settings given at load time.
+%    \begin{macrocode}
 \ProcessKeysOptions { teachingtools }
-
+%    \end{macrocode}
+%
+%    \begin{macrocode}
+%</package>
+%    \end{macrocode}
+%
 % \end{implementation}
-
 \endinput
