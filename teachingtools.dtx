@@ -160,6 +160,19 @@ This work consists of the file  teachingtools.dtx
 \RequirePackage{ l3keys2e , chngcntr , enumitem }
 %    \end{macrocode}
 %
+%\subsection{Messages and error handling}
+% All of the error and warning messages are defined here in one place to
+% simplify things.
+%
+%    \begin{macrocode}
+\msg_new:nnnn { teachingtools } { unknown-option }
+  { Unknown~option~'#1'. }
+  {
+    The~option~'#1'~is~not~known~by~teachingtools:~
+    perhaps~it~is~spelled~incorrectly.
+}
+%    \end{macrocode}
+%
 %\begin{macro}{
 %  \@@_error:nxx ,
 %  \@@_error:nx  ,
@@ -298,19 +311,6 @@ This work consists of the file  teachingtools.dtx
   },
   reset-all .default:n = false,
   reset-all .initial:n = false,
-}
-%    \end{macrocode}
-%
-%\subsection{Messages}
-% All of the error and warning messages are defined here in one place to
-% simplify things.
-%
-%    \begin{macrocode}
-\msg_new:nnnn { teachingtools } { unknown-option }
-  { Unknown~option~'#1'. }
-  {
-    The~option~'#1'~is~not~known~by~teachingtools:
-    perhaps~it~is~spelled~incorrectly.
 }
 %    \end{macrocode}
 %
