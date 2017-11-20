@@ -218,10 +218,20 @@ This work consists of the file  teachingtools.dtx
 %    \end{macrocode}
 %\end{macro}
 %
-% \subsection{Options}
-% The following options are provided to control the behaviour of
-% \pkg{teachingtools}.
+% \subsection{Printing routines}
+% Some general-purpose printing routines are provided here to ensure that text
+% can be printed with the necessary configuration can be set.  Although not
+% needed right now, these macros will ensure that fonts can be configured for
+% the environment labels (among other things).
+% 
+%\begin{macro}{\l_@@_print_arg_tl}
+% The text to print.
+%    \begin{macrocode}
+\tl_new:N \l_@@_print_arg_tl
+%    \end{macrocode}
+%\end{macro}
 %
+% \subsection{Resetting counters}
 %\begin{macro}{
 %  \l_@@_reset_question_tl        ,
 %  \l_@@_reset_example_tl         ,
@@ -314,15 +324,117 @@ This work consists of the file  teachingtools.dtx
 }
 %    \end{macrocode}
 %
-% 
+% \subsection{Formatting counters and labels}
+% The label style of both environments can be set to any of the predefined
+% counter styles: arabic, alphabetic, uppercase alphabetic, Roman numerals,
+% uppercase Roman numerals, and footnote symbols.  The latter style is provided
+% but not recommended for use.
+% % TODO
+% % Implement the following options:
+% % - prefix : whether to show a prefix to the counter, especially if
+% %    resetting at different sectioning levels.
+% % - prefix-separator : character to use between prefix and counter
+% %    (default to hyphen or en-dash --)
+% %
+% % - formatting of environment? No idea how to do that
 %
-% \subsection{Dimensions and Counters}
+%\begin{macro}{
+%  \l_@@_question_title_tl ,
+%  \l_@@_question_label_tl ,
+%  \l_@@_example_title_tl  ,
+%  \l_@@_example_label_tl
+%}
+% The environment labels are built up as a token lists by appending or prefixing
+% each element as necessary.
+%    \begin{macrocode}
+\tl_new:N \l_@@_question_title_tl
+\tl_new:N \l_@@_question_label_tl
+\tl_new:N \l_@@_example_title_tl
+\tl_new:N \l_@@_example_label_tl
+%    \end{macrocode}
+%
+%\begin{macro}{
+%  \l_@@_question_label_tl ,
+%}
+% The label on the question environment can be set using this key.  The default
+% is Arabic numerals.
+%    \begin{macrocode}
+\keys_define:nn { teachingtools } {
+  question-label .choice:,
+  question-label / arabic .code:n = {
+    \tl_set:Nn \l_@@_question_label_tl { \arabic{question} }
+  },
+  question-label / alph .code:n = {
+    \tl_set:Nn \l_@@_question_label_tl { \alph{question} }
+  },
+  question-label / lower-alph .code:n = {
+    \tl_set:Nn \l_@@_question_label_tl { \alph{question} }
+  },
+  question-label / upper-alph .code:n = {
+    \tl_set:Nn \l_@@_question_label_tl { \Alph{question} }
+  },
+  question-label / roman .code:n = {
+    \tl_set:Nn \l_@@_question_label_tl { \roman{question} }
+  },
+  question-label / lower-roman .code:n = {
+    \tl_set:Nn \l_@@_question_label_tl { \roman{question} }
+  },
+  question-label / upper-roman .code:n = {
+    \tl_set:Nn \l_@@_question_label_tl { \Roman{question} }
+  },
+  question-label / footnote-symbol .code:n = {
+    \tl_set:Nn \l_@@_question_label_tl { \fnsymbol{question} }
+  },
+  question-label .default:n = arabic,
+  question-label .initial:n = arabic,
+}
+\tl_put_right:Nn \l_@@_question_title_tl { \l_@@_question_label_tl }
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{
+%  \l_@@_example_label_tl
+%}
+% The label on the example environment can be set using this key.  The default
+% is Arabic numerals.
+%    \begin{macrocode}
+\keys_define:nn { teachingtools } {
+  example-label .choice:,
+  example-label / arabic .code:n = {
+    \tl_set:Nn \l_@@_example_label_tl { \arabic{example} }
+  },
+  example-label / alph .code:n = {
+    \tl_set:Nn \l_@@_example_label_tl { \alph{example} }
+  },
+  example-label / lower-alph .code:n = {
+    \tl_set:Nn \l_@@_example_label_tl { \alph{example} }
+  },
+  example-label / upper-alph .code:n = {
+    \tl_set:Nn \l_@@_example_label_tl { \Alph{example} }
+  },
+  example-label / roman .code:n = {
+    \tl_set:Nn \l_@@_example_label_tl { \roman{example} }
+  },
+  example-label / lower-roman .code:n = {
+    \tl_set:Nn \l_@@_example_label_tl { \roman{example} }
+  },
+  example-label / upper-roman .code:n = {
+    \tl_set:Nn \l_@@_example_label_tl { \Roman{example} }
+  },
+  example-label / footnote-symbol .code:n = {
+    \tl_set:Nn \l_@@_example_label_tl { \fnsymbol{example} }
+  },
+  example-label .default:n = arabic,
+  example-label .initial:n = arabic,
+}
+\tl_put_right:Nn \l_@@_example_title_tl { \l_@@_example_label_tl }
+%    \end{macrocode}
+%\end{macro}
+%
+% \subsection{Dimensions and counters}
 % A number of dimensions and lengths are used internally to define spacing
-% around each environment, and counters are used to ensure that the environments
-% can be sequentially numbered.
-%
-% Each environment has its own skip length, initially set to the value of that
-% for the \cs{question} environment.
+% around each environment.  Each environment has its own skip length, initially
+% set to the value of that for the \cs{question} environment.
 %    \begin{macrocode}
 \skip_new:N \questionbefore
 \skip_new:N \questionafter
@@ -364,7 +476,7 @@ This work consists of the file  teachingtools.dtx
     { { \bfseries Question.\par } }
     {
       \refstepcounter{question}
-      {\bfseries Question~\thequestion.\par}
+      {\bfseries Question~\l_@@_question_title_tl.\par}
     }
   \begin{itshape}
 }
@@ -384,7 +496,7 @@ This work consists of the file  teachingtools.dtx
     { { \bfseries Example.\par } }
     {
       \refstepcounter{example}
-      {\bfseries Example~\theexample.\par}
+      {\bfseries Example~\l_@@_example_title_tl.\par}
     }
 }
 {\par\vspace\exampleafter}
