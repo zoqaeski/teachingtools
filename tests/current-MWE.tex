@@ -6,247 +6,52 @@
 
     \setlength\parindent{0pt}
 
+    \begin{document}
+
     \ExplSyntaxOn
 
-    \keys_define:nn { teachingtools } {
-      reset-all .choice:,
-      reset-all .default:n = false,
-      reset-all / part .meta:n = {
-        reset-question = part,
-        reset-example = part
-      },
-      reset-all / chapter .meta:n = {
-        reset-question = chapter,
-        reset-example = chapter
-      },
-      reset-all / section .meta:n = {
-        reset-question = section,
-        reset-example = section
-      },
-      reset-all / subsection .meta:n = {
-        reset-question = subsection,
-        reset-example = subsection
-      },
-      reset-all / subsubsection .meta:n = {
-        reset-question = subsubsection,
-        reset-example = subsubsection
-      },
-      reset-all / paragraph .meta:n = {
-        reset-question = paragraph,
-        reset-example = paragraph
-      },
-      reset-all / subparagraph .meta:n = {
-        reset-question = subparagraph,
-        reset-example = subparagraph
-      },
-      reset-all / false .meta:n = {
-        reset-question = section,
-        reset-example = none
-      }
-    }
-    \keys_define:nn { teachingtools } {
-      reset-question .default:n = section,
-      reset-question .choices:nn = {
-        part, chapter, section, subsection, subsubsection, paragraph, subparagraph
-      }
-      {
-        \counterwithin*{question}{\l_keys_choice_tl}
-      },
-      reset-question / none .code:n = {
-        \counterwithout*{question}{section}
-      },
-    }
-    \keys_define:nn { teachingtools } {
-      reset-example .default:n = none,
-      reset-example .choices:nn = {
-        part, chapter, section, subsection, subsubsection, paragraph, subparagraph
-      }
-      {
-        \counterwithin*{example}{\l_keys_choice_tl}
-      },
-      reset-example / none .code:n = {
-        \counterwithout*{example}{section}
-      },
-    }
-
     \newcounter{question}
-    \newcounter{example}
+    \keys_define:nn { teachingtools } {
+        reset-question .default:n = section,
+        reset-question .choices:nn = {
+            part, chapter, section, subsection, subsubsection, paragraph, subparagraph
+        }
+        {
+            \counterwithin*{question}{ \tl_to_str:N \l_keys_choice_tl }
+        },
+        reset-question / none .code:n = {
+            \counterwithout*{question}{section}
+        },
+    }
 
-    \NewDocumentEnvironment { question } { s } {
-      \par
-      \IfBooleanTF #1
-        { { \bfseries Question.\par } }
-        {
-          \refstepcounter{question}
-          {\bfseries Question~\thequestion.\par}
+    \tl_new:N \l_@@_question_prefix_tl
+    \keys_define:nn { teachingtools } {
+        question-prefix .choices:nn = { 
+            part, chapter, section, subsection, subsubsection, paragraph, subparagraph
         }
-      \begin{itshape}
-    }
-    {\end{itshape}\par}
-    \cs_new:cpn {question*} {\question*}
-    \cs_new_eq:cN {endquestion*} \endquestion
-    \NewDocumentEnvironment { example } { s } {
-      \par
-      \IfBooleanTF #1
-        { { \bfseries Example.\par } }
         {
-          \refstepcounter{example}
-          {\bfseries Example~\theexample.\par}
-        }
+            \tl_set:Nn \l_@@_question_prefix_tl { \arabic{ \tl_to_str:N \l_keys_choice_tl } }
+            \keys_set:nn { teachingtools } { reset-question = \tl_to_str:N \l_keys_choice_tl }
+        },
+        question-prefix / none .code:n = {
+            \tl_gclear:N \l_@@_question_prefix_tl 
+        },
+        question-prefix .default:n = none,
+        question-prefix .initial:n = none,
     }
-    {\par}
-    \cs_new:cpn {example*} {\example*}
-    \cs_new_eq:cN {endexample*} \endexample
+    \tl_put_right:Nn \l_@@_question_title_tl { \l_@@_question_prefix_tl }
+
     \NewDocumentCommand \ttsetup { m } {
-      \keys_set:nn { teachingtools } {#1}
+        \keys_set:nn { teachingtools } {#1}
     }
     \ExplSyntaxOff
 
-    \begin{document}
 
     \ttsetup{
       % reset-all = false,
       % reset-question = subsection,
-      % reset-example = section,
+        question-prefix = section
     }
 
-    \section{A section}
-
-    \begin{question}
-    The question in a section
-    \end{question}
-
-    \begin{example}
-        This is an example of the \texttt{example} environment.
-    \end{example}
-
-    \subsection{A subsection}
-
-    \begin{question}
-    The question in a subsection
-    \end{question}
-
-    \begin{example*}
-        This is an example of the \texttt{example*} environment.
-    \end{example*}
-
-    \begin{question}
-    Another question in a subsection
-    \end{question}
-
-    \begin{example}
-        This is an example of the \texttt{example} environment.
-    \end{example}
-
-    \subsubsection{A subsubsection}
-
-    \begin{question*}
-    A starred question in a subsubsection
-    \end{question*}
-
-    \begin{example}
-        This is an example of the \texttt{example} environment.
-    \end{example}
-
-
-    \begin{question}
-    The question in a subsubsection
-    \end{question}
-
-    \begin{question}
-    Another question in a subsubsection
-    \end{question}
-
-    \begin{example}
-        This is an example of the \texttt{example} environment.
-    \end{example}
-
-    \subsubsection{A subsubsection}
-
-    \begin{question}
-    The question in a subsubsection
-    \end{question}
-
-    \begin{example}
-        This is an example of the \texttt{example} environment.
-    \end{example}
-
-    \begin{question}
-    Another question in a subsubsection
-    \end{question}
-
-    \subsection{Another subsection}
-
-    \begin{example}
-        This is an example of the \texttt{example} environment.
-    \end{example}
-
-    \begin{question}
-    Another question in a subsection
-    \end{question}
-
-    \begin{question}
-    What is this question?
-    \end{question}
-
-    \section{Another section}
-
-    \begin{question}
-    Another question in another section
-    \end{question}
-
-    \begin{question}
-    Another question in another section
-    \end{question}
-
-    \begin{example}
-        This is an example of the \texttt{example} environment.
-    \end{example}
-
-    \subsection{A subsection}
-
-    \begin{question}
-    The question in a subsection
-    \end{question}
-
-    \begin{question}
-    Another question in a subsection
-    \end{question}
-
-    \begin{example}
-        This is an example of the \texttt{example} environment.
-    \end{example}
-
-    \begin{question}
-    Another question in a subsection
-    \end{question}
-
-    \subsubsection{A subsubsection}
-
-    \begin{question}
-    The question in a subsubsection
-    \end{question}
-
-    \begin{question}
-    Another question in a subsubsection
-    \end{question}
-
-    \begin{example}
-        This is an example of the \texttt{example} environment.
-    \end{example}
-
-    \subsubsection{A subsubsection}
-
-    \begin{question}
-    The question in a subsubsection
-    \end{question}
-
-    \begin{question}
-    Another question in a subsubsection
-    \end{question}
-
-    \begin{example}
-        This is an example of the \texttt{example} environment.
-    \end{example}
 
     \end{document}

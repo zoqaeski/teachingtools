@@ -27,8 +27,10 @@
 \ttsetup{
   % reset-all = none,
   % reset-question = subsection,
-  example-label = upper-alph,
-  reset-question = section,
+  % example-label = upper-alph,
+  question-label = lower-alph,
+  question-prefix = section,
+  % prefix-separator = colon,
 }
 
 % \usepackage[foo]{siunitx}
@@ -83,6 +85,8 @@ Another question in a subsection
 \begin{question*}
 A starred question in a subsubsection
 \end{question*}
+
+A counter: \arabic{subsubsection}
 
 \begin{example}
     This is an example of the \texttt{example} environment.
