@@ -237,6 +237,7 @@ This work consists of the file  teachingtools.dtx
     \tl_put_right:Nx \l_tmpa_tl { \l_@@_prefix_separator_str }
   }
   \tl_put_right:Nx \l_tmpa_tl { \l_@@_question_label_tl }
+  \tl_put_right:Nx \l_tmpa_tl { \l_@@_suffix_character_str }
   \tl_to_str:N \l_tmpa_tl
 }
 %    \end{macrocode}
@@ -254,6 +255,7 @@ This work consists of the file  teachingtools.dtx
     \tl_put_right:Nx \l_tmpa_tl { \l_@@_prefix_separator_str }
   }
   \tl_put_right:Nx \l_tmpa_tl { \l_@@_example_label_tl }
+  \tl_put_right:Nx \l_tmpa_tl { \l_@@_suffix_character_str }
   \tl_to_str:N \l_tmpa_tl
 }
 %    \end{macrocode}
@@ -392,7 +394,7 @@ This work consists of the file  teachingtools.dtx
     \str_set:Nn \l_@@_prefix_separator_str { . }
   },
   prefix-separator / colon .code:n = {
-    \str_set:Nn \l_@@_prefix_separator_str { : }
+    \str_set:Nx \l_@@_prefix_separator_str { \c_colon_str }
   },
   prefix-separator / none .code:n = {
     \str_gclear:N \l_@@_prefix_separator_str
@@ -600,7 +602,8 @@ This work consists of the file  teachingtools.dtx
 %  \l_@@_example_label_tl
 %}
 % The label on the example environment can be set using this key.  The default
-% is also Arabic numerals.
+% is uppercase Latin characters; note that this presently implies a limit of 26
+% examples unless changed to a different label style.
 %    \begin{macrocode}
 \tl_new:N \l_@@_example_label_tl
 \keys_define:nn { teachingtools } {
@@ -629,12 +632,38 @@ This work consists of the file  teachingtools.dtx
   example-label / footnote-symbol .code:n = {
     \tl_set:Nn \l_@@_example_label_tl { \fnsymbol{example} }
   },
-  example-label .default:n = arabic,
-  example-label .initial:n = arabic,
+  example-label .default:n = upper-alph,
+  example-label .initial:n = upper-alph,
 }
 %    \end{macrocode}
 %\end{macro}
 %
+%\begin{macro}{
+%  \l_@@_suffix_character_str
+%}
+% The \opt{suffix-character} is a character appended after the environment
+% number.
+%    \begin{macrocode}
+\str_new:N \l_@@_suffix_character_str
+\keys_define:nn { teachingtools } {
+  suffix-character .choice:,
+  suffix-character / dot .code:n = {
+    \str_set:Nn \l_@@_suffix_character_str { . }
+  },
+  suffix-character / colon .code:n = {
+    \str_set:Nx \l_@@_suffix_character_str { \c_colon_str }
+  },
+  suffix-character / bracket .code:n = {
+    \str_set:Nx \l_@@_suffix_character_str { ) }
+  },
+  suffix-character / none .code:n = {
+    \str_gclear:N \l_@@_suffix_character_str
+  },
+  suffix-character .default:n = dot,
+  suffix-character .initial:n = dot,
+}
+%    \end{macrocode}
+%\end{macro}
 % \subsection{Dimensions and lengths}
 % A number of dimensions and lengths are used internally to define spacing
 % around each environment.  Each environment has its own skip length, initially
@@ -671,10 +700,10 @@ This work consists of the file  teachingtools.dtx
 \NewDocumentEnvironment { question } { s } {
   \par \skip_vertical:N \questionbefore
   \IfBooleanTF #1 
-    { { \bfseries Question.\par } }
+    { { \bfseries Question.\par\nopagebreak } }
     {
       \refstepcounter{question}
-      {\bfseries Question~\@@_print_question: .\par}
+      {\bfseries Question~\@@_print_question: \par\nopagebreak}
     }
   \begin{itshape}
 }
@@ -690,7 +719,7 @@ This work consists of the file  teachingtools.dtx
 \NewDocumentEnvironment { answer } { s } {
   \par\vspace\answerbefore
   \setcounter{equation}{0}
-    { \bfseries Solution:\par }
+    { \bfseries Solution:\par\nopagebreak }
 }
 {\par\vspace\answerafter}
 \cs_new:cpn {answer*} {\example*}
@@ -705,10 +734,10 @@ This work consists of the file  teachingtools.dtx
 \NewDocumentEnvironment { example } { s } {
   \par\vspace\examplebefore
   \IfBooleanTF #1 
-    { { \bfseries Example.\par } }
+    { { \bfseries Example.\par\nopagebreak } }
     {
       \refstepcounter{example}
-      {\bfseries Example~\@@_print_example: .\par}
+      {\bfseries Example~\@@_print_example: \par\nopagebreak}
     }
 }
 {\par\vspace\exampleafter}
