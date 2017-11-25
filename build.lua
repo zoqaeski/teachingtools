@@ -2,11 +2,18 @@
 
 -- Build script for teachingtools
 
+bundle = ""
 module = "teachingtools"
 
-unpackfiles = {"*.dtx"}
-excludefiles = {"*/teachingtools.pdf"}
-unpackopts  = "-interaction=batchmode"
+-- Install config files
+installfiles = {"*.cfg", "*.sty"}
+
+-- Release a TDS-style zip
+packtdszip = true
+
+-- Auto-versioning
+versionfiles = {"teachingtools.dtx"}
+versionform = "ProvidesExplPackage"
 
 kpse.set_program_name("kpsewhich")
 dofile(kpse.lookup("l3build.lua"))

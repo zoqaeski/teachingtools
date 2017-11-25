@@ -136,7 +136,7 @@ This work consists of the file  teachingtools.dtx
 %
 % The usual preliminaries apply.
 %    \begin{macrocode}
-\ProvidesExplPackage {teachingtools} {2017/11/22} {0.2}
+\ProvidesExplPackage {teachingtools} {2017/11/25} {-1}
   {Environments and tools for teaching materials}
 %    \end{macrocode}
 %
@@ -693,6 +693,20 @@ This work consists of the file  teachingtools.dtx
 {\end{itshape}\par \skip_vertical:N \questionafter}
 \cs_new:cpn {question*} {\question*}
 \cs_new_eq:cN {endquestion*} \endquestion
+%    \end{macrocode}
+%\end{environment}
+%
+%\begin{environment}{answer}
+% The \cs{answer} environment is used to format the answer.  
+%    \begin{macrocode}
+\NewDocumentEnvironment { answer } { s } {
+  \par\vspace\answerbefore
+  \setcounter{equation}{0}
+    { \bfseries Solution:\par }
+}
+{\par\vspace\answerafter}
+\cs_new:cpn {answer*} {\example*}
+\cs_new_eq:cN {endanswer*} \endexample
 %    \end{macrocode}
 %\end{environment}
 %
