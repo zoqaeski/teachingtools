@@ -119,6 +119,9 @@ This work consists of the file  teachingtools.dtx
 %
 %\changes{v0.1}{2017/11/18}{First public testing release}
 %\changes{v0.2}{2017/11/22}{Added support for environment numbering prefixes}
+%\changes{v0.3a}{2017/12/12}{Question and example numbers can be set via
+%options, and the 26 instance limitation on alphabetically-numbered environments
+%no longer applies.}
 %
 %\begin{implementation}
 %
@@ -136,7 +139,7 @@ This work consists of the file  teachingtools.dtx
 %
 % The usual preliminaries apply.
 %    \begin{macrocode}
-\ProvidesExplPackage {teachingtools} {2017/11/25} {-1}
+\ProvidesExplPackage {teachingtools} {2017/11/25} {v0.2}
   {Environments and tools for teaching materials}
 %    \end{macrocode}
 %
@@ -162,6 +165,10 @@ This work consists of the file  teachingtools.dtx
 %    \begin{macrocode}
 \RequirePackage{ l3keys2e , chngcntr , enumitem }
 %    \end{macrocode}
+%
+% The package \pkg{cleveref} does some clever things with reference handling,
+% but it needs a reference format defined for each type of thing we might choose
+% to reference.
 %
 %\subsection{Messages and error handling}
 %
@@ -225,145 +232,192 @@ This work consists of the file  teachingtools.dtx
 % Some general-purpose printing routines are provided here to ensure that text
 % can be printed with the necessary configuration.
 % 
-%\begin{macro}{
-%  \@@_print_question:
-%}
-% This function prints the \texttt{question} environment numbering string.
+%\begin{macro}{ \@@_print_question: }
+% This function prints the \texttt{question} title, with or without numbering as
+% required.
 %    \begin{macrocode}
 \cs_new:Nn \@@_print_question: {
-  \tl_clear:N \l_tmpa_tl
-  \bool_if:NT \l_@@_question_prefix_bool {
-    \tl_put_right:Nx \l_tmpa_tl { \l_@@_question_prefix_tl }
-    \tl_put_right:Nx \l_tmpa_tl { \l_@@_prefix_separator_str }
+  \str_clear:N \l_tmpa_str
+  \bool_if:NT \l_@@_numbered_question_bool {
+    \refstepcounter{question}
+    \str_put_left:Nn \l_tmpa_str { ~ }
+    \@@_print_question_label:
+    \str_put_right:Nx \l_tmpa_str { \l_tmpb_str }
   }
-  \tl_put_right:Nx \l_tmpa_tl { \l_@@_question_label_tl }
-  \tl_put_right:Nx \l_tmpa_tl { \l_@@_suffix_character_str }
-  \tl_to_str:N \l_tmpa_tl
+  \str_put_right:Nx \l_tmpa_str { \l_@@_suffix_character_str }
+  \par \skip_vertical:N \questionbefore
+  \group_begin:
+  \bfseries Question\l_tmpa_str \par\nopagebreak
+  \group_end:
 }
 %    \end{macrocode}
 %\end{macro}
-
+%
+%\begin{macro}{ \@@_print_question_label }
+% This function prints out the \texttt{question} label.
+%    \begin{macrocode}
+\cs_new:Nn \@@_print_question_label: {
+  \str_clear:N \l_tmpb_str
+  \bool_if:NT \l_@@_question_prefix_bool {
+    \str_put_right:Nx \l_tmpb_str { \l_@@_question_prefix_tl }
+    \str_put_right:Nx \l_tmpb_str { \l_@@_prefix_separator_str }
+  }
+  \str_put_right:Nx \l_tmpb_str { \l_@@_question_label_tl }
+}
+%    \end{macrocode}
+%\end{macro}
+%
 %\begin{macro}{
 %  \@@_print_example:
 %}
 % This function prints the \texttt{example} environment numbering string.
 %    \begin{macrocode}
 \cs_new:Nn \@@_print_example: {
-  \tl_clear:N \l_tmpa_tl
-  \bool_if:NT \l_@@_example_prefix_bool {
-    \tl_put_right:Nx \l_tmpa_tl { \l_@@_example_prefix_tl }
-    \tl_put_right:Nx \l_tmpa_tl { \l_@@_prefix_separator_str }
+  \bool_if:NT \l_@@_numbered_example_bool {
+    \refstepcounter{example}
+    \str_put_left:Nn \l_tmpa_str { ~ }
+    \bool_if:NT \l_@@_example_prefix_bool {
+      \str_put_right:Nx \l_tmpa_str { \l_@@_example_prefix_tl }
+      \str_put_right:Nx \l_tmpa_str { \l_@@_prefix_separator_str }
+    }
+    \str_put_right:Nx \l_tmpa_str { \l_@@_example_label_tl }
   }
-  \tl_put_right:Nx \l_tmpa_tl { \l_@@_example_label_tl }
-  \tl_put_right:Nx \l_tmpa_tl { \l_@@_suffix_character_str }
-  \tl_to_str:N \l_tmpa_tl
+  \str_put_right:Nx \l_tmpa_str { \l_@@_suffix_character_str }
+  \par \skip_vertical:N \examplebefore
+  \group_begin:
+  \bfseries Example\l_tmpa_str \par\nopagebreak
+  \group_end:
 }
 %    \end{macrocode}
 %\end{macro}
 %
 % \subsection{Resetting counters}
-%\begin{macro}{
-%  \l_@@_reset_question_tl
-%}
-% The \opt{reset-question} option provides a means for question numbering to be reset
-% at different sectioning \enquote{levels}.  The default is for numbering to be
-% reset at the \enquote{section} level.
+%\begin{macro}{\l_@@_reset_question_tl}
+%\begin{macro}{\l_@@_reset_example_tl}
+%\begin{macro}{\l_@@_reset_all_tl}
+%
+% The \opt{reset} option provides a means for environment numbering to be reset
+% at different sectioning \enquote{levels}.  By default, question numbering is
+% reset at the \enquote{section} level, and example numbering is not reset.
 %    \begin{macrocode}
 \newcounter{question}
-\keys_define:nn { teachingtools } {
-  reset-question .default:n = section,
-  reset-question .choices:nn = {
+\keys_define:nn { teachingtools / question } {
+  reset .default:n = section,
+  reset .choices:nn = {
     part, chapter, section, subsection, subsubsection, paragraph, subparagraph
   }
   {
     \counterwithin*{question}{ \tl_to_str:N \l_keys_choice_tl }
   },
-  reset-question / none .code:n = {
+  reset / none .code:n = {
     \counterwithout*{question}{section}
   },
 }
 %    \end{macrocode}
-%\end{macro}
 %
-%\begin{macro}{
-%  \l_@@_reset_example_tl
-%}
-% The \opt{reset-example} option provides a means for example numbering to be reset
-% at different sectioning \enquote{levels}.  The default is for numbering to be
-% not reset.
 %    \begin{macrocode}
 \newcounter{example}
-\keys_define:nn { teachingtools } {
-  reset-example .default:n = none,
-  reset-example .choices:nn = {
+\keys_define:nn { teachingtools / example } {
+  reset .default:n = none,
+  reset .choices:nn = {
     part, chapter, section, subsection, subsubsection, paragraph, subparagraph
   }
   {
     \counterwithin*{example}{ \tl_to_str:N \l_keys_choice_tl }
   },
-  reset-example / none .code:n = {
+  reset / none .code:n = {
     \counterwithout*{example}{section}
   },
 }
 %    \end{macrocode}
-%\end{macro}
 %
-%\begin{macro} {
-%  \l_@@_reset_all_tl 
-%}
-% The \opt{reset-all} option provides a means for environment numbering to be reset
-% at different sectioning \enquote{levels}.  The default is for numbering to be
-% set individually for each environment.
 %    \begin{macrocode}
 \keys_define:nn { teachingtools } {
-  reset-all .choice:,
-  reset-all / part .meta:n = {
-    reset-question = part,
-    reset-example = part
+  reset .choice:,
+  reset / part .meta:n = {
+    question / reset = part,
+    example / reset = part
   },
-  reset-all / chapter .meta:n = {
-    reset-question = chapter,
-    reset-example = chapter
+  reset / chapter .meta:n = {
+    question / reset = chapter,
+    example / reset = chapter
   },
-  reset-all / section .meta:n = {
-    reset-question = section,
-    reset-example = section
+  reset / section .meta:n = {
+    question / reset = section,
+    example / reset = section
   },
-  reset-all / subsection .meta:n = {
-    reset-question = subsection,
-    reset-example = subsection
+  reset / subsection .meta:n = {
+    question / reset = subsection,
+    example / reset = subsection
   },
-  reset-all / subsubsection .meta:n = {
-    reset-question = subsubsection,
-    reset-example = subsubsection
+  reset / subsubsection .meta:n = {
+    question / reset = subsubsection,
+    example / reset = subsubsection
   },
-  reset-all / paragraph .meta:n = {
-    reset-question = paragraph,
-    reset-example = paragraph
+  reset / paragraph .meta:n = {
+    question / reset = paragraph,
+    example / reset = paragraph
   },
-  reset-all / subparagraph .meta:n = {
-    reset-question = subparagraph,
-    reset-example = subparagraph
+  reset / subparagraph .meta:n = {
+    question / reset = subparagraph,
+    example / reset = subparagraph
   },
-  reset-all / none .meta:n = {
-    reset-question = none,
-    reset-example = none
+  reset / none .meta:n = {
+    question / reset = none,
+    example / reset = none
   },
-  reset-all / false .meta:n = {
-    reset-question,
-    reset-example
+  reset / false .meta:n = {
+    question / reset,
+    example / reset
   },
-  reset-all .default:n = false,
-  reset-all .initial:n = false,
+  reset .default:n = false,
+  reset .initial:n = false,
 }
 %    \end{macrocode}
+%\end{macro}
+%\end{macro}
+%\end{macro}
+%
+%\begin{macro}{\l_@@_numbered_question_bool}
+%\begin{macro}{\l_@@_numbered_example_bool}
+% This local variable is used to toggle between numbered and unnumbered
+% questions.
+%    \begin{macrocode}
+\bool_new:N \l_@@_numbered_question_bool
+\bool_new:N \l_@@_numbered_example_bool
+%    \end{macrocode}
+%\end{macro}
+%\end{macro}
+%
+%\begin{macro}{\l_@@_question_number_int}
+%\begin{macro}{\l_@@_example_number_int}
+% The environment counters can be set to specific values using the \opt{number}
+% option.  This is only really useful when passed as an optional argument to an
+% environment instance; note that normal counter incrementing still applies for
+% subsequent instances.
+%    \begin{macrocode}
+\keys_define:nn { teachingtools } {
+  question / number .code:n = {
+    \int_set_eq:NN \l_tmpa_int #1
+    \int_decr:N \l_tmpa_int
+    \setcounter{question}{ \int_use:N \l_tmpa_int }
+  },
+  example / number .code:n = {
+    \int_set_eq:NN \l_tmpa_int #1
+    \int_decr:N \l_tmpa_int
+    \setcounter{example}{ \int_use:N \l_tmpa_int }
+  },
+}
+%    \end{macrocode}
+%\end{macro}
 %\end{macro}
 %
 % \subsection{Formatting counters and labels}
 % The label style of both environments can be set to any of the predefined
 % counter styles: arabic, alphabetic, uppercase alphabetic, Roman numerals,
 % uppercase Roman numerals, and footnote symbols.  The latter style is provided
-% but not recommended for use.
+% but not recommended for use, and may be deprecated in a future version as it
+% is of limited practical use.
 % 
 % The following features are planned but not yet implemented:
 %
@@ -375,12 +429,10 @@ This work consists of the file  teachingtools.dtx
 % Each environment can have an optional prefix to precede the number with
 % that of the specified sectioning level. Note that this implies resetting of
 % the environment counter at the specified level, unless overridden by the
-% \opt{reset-question}, \opt{reset-example}, or \opt{reset-all} options. The
+% \opt{question / reset}, \opt{example / reset}, or \opt{reset} options. The
 % default is none.
 %
-%\begin{macro}{
-%  \l_@@_prefix_separator_tl
-%}
+%\begin{macro}{\l_@@_prefix_separator_tl}
 % The \opt{prefix-separator} is a character used to separate the environment
 % numbering prefix from its number, if the prefix exists.
 %    \begin{macrocode}
@@ -405,242 +457,234 @@ This work consists of the file  teachingtools.dtx
 %    \end{macrocode}
 %\end{macro}
 %
-%\begin{macro}{
-%  \l_@@_question_prefix_tl   ,
-%  \l_@@_question_prefix_bool
-%}
-% The \opt{question-prefix} sets the prefix for the \texttt{question}
+%\begin{macro}{\l_@@_question_prefix_tl}
+%\begin{macro}{\l_@@_question_prefix_bool}
+% The \opt{question / prefix} sets the prefix for the \texttt{question}
 % environment.
 %    \begin{macrocode}
 \tl_new:N \l_@@_question_prefix_tl
 \bool_new:N \l_@@_question_prefix_bool
-\keys_define:nn { teachingtools } {
-  question-prefix .choice:, 
-  question-prefix / part .code:n = {
+\keys_define:nn { teachingtools / question } {
+  prefix .choice:, 
+  prefix / part .code:n = {
     \tl_set:Nn \l_@@_question_prefix_tl { \arabic{part} }
     \keys_set:nn { teachingtools } { 
-      reset-question = part,
+      question / reset = part,
       prefix-separator = dash,
     }
     \bool_set_true:N \l_@@_question_prefix_bool
   },
-  question-prefix / chapter .code:n = {
+  prefix / chapter .code:n = {
     \tl_set:Nn \l_@@_question_prefix_tl { \arabic{chapter} }
     \keys_set:nn { teachingtools } { 
-      reset-question = chapter,
+      question / reset = chapter,
       prefix-separator = dash,
     }
     \bool_set_true:N \l_@@_question_prefix_bool
   },
-  question-prefix / section .code:n = {
+  prefix / section .code:n = {
     \tl_set:Nn \l_@@_question_prefix_tl { \arabic{section} }
     \keys_set:nn { teachingtools } {
-      reset-question = section,
+      question / reset = section,
       prefix-separator = dash,
     }
     \bool_set_true:N \l_@@_question_prefix_bool
   },
-  question-prefix / subsection .code:n = {
+  prefix / subsection .code:n = {
     \tl_set:Nn \l_@@_question_prefix_tl { \arabic{subsection} }
     \keys_set:nn { teachingtools } {
-      reset-question = subsection,
+      question / reset = subsection,
       prefix-separator = dash,
     }
     \bool_set_true:N \l_@@_question_prefix_bool
   },
-  question-prefix / subsubsection .code:n = {
+  prefix / subsubsection .code:n = {
     \tl_set:Nn \l_@@_question_prefix_tl { \arabic{subsubsection} }
     \keys_set:nn { teachingtools } {
-      reset-question = subsubsection,
+      question / reset = subsubsection,
       prefix-separator = dash,
     }
     \bool_set_true:N \l_@@_question_prefix_bool
   },
-  question-prefix / paragraph .code:n = {
+  prefix / paragraph .code:n = {
     \tl_set:Nn \l_@@_question_prefix_tl { \arabic{paragraph} }
     \keys_set:nn { teachingtools } {
-      reset-question = paragraph,
+      question / reset = paragraph,
       prefix-separator = dash,
     }
     \bool_set_true:N \l_@@_question_prefix_bool
   },
-  question-prefix / subparagraph .code:n = {
+  prefix / subparagraph .code:n = {
     \tl_set:Nn \l_@@_question_prefix_tl { \arabic{subparagraph} }
     \keys_set:nn { teachingtools } {
-      reset-question = subparagraph,
+      question / reset = subparagraph,
       prefix-separator = dash,
     }
     \bool_set_true:N \l_@@_question_prefix_bool
   },
-  question-prefix / none .code:n = {
+  prefix / none .code:n = {
     \tl_gclear:N \l_@@_question_prefix_tl 
   },
-  question-prefix .default:n = none,
-  question-prefix .initial:n = none,
+  prefix .default:n = none,
+  prefix .initial:n = none,
 }
 %    \end{macrocode}
 %\end{macro}
+%\end{macro}
 %
-%\begin{macro}{
-%  \l_@@_example_prefix_tl   ,
-%  \l_@@_example_prefix_bool
-%}
-% The \opt{example-prefix} sets the prefix for the \texttt{example}
+%\begin{macro}{\l_@@_example_prefix_tl}
+%\begin{macro}{\l_@@_example_prefix_bool}
+% The \opt{prefix} sets the prefix for the \texttt{example}
 % environment.
 %    \begin{macrocode}
 \tl_new:N \l_@@_example_prefix_tl
 \bool_new:N \l_@@_example_prefix_bool
-\keys_define:nn { teachingtools } {
-  example-prefix .choice:, 
-  example-prefix / part .code:n = {
+\keys_define:nn { teachingtools / example } {
+  prefix .choice:, 
+  prefix / part .code:n = {
     \tl_set:Nn \l_@@_example_prefix_tl { \arabic{part} }
     \bool_set_true:N \l_@@_example_prefix_bool
     \keys_set:nn { teachingtools } { 
-      reset-example = part,
+      example / reset = part,
       prefix-separator = dash,
     }
   },
-  example-prefix / chapter .code:n = {
+  prefix / chapter .code:n = {
     \tl_set:Nn \l_@@_example_prefix_tl { \arabic{chapter} }
     \bool_set_true:N \l_@@_example_prefix_bool
     \keys_set:nn { teachingtools } { 
-      reset-example = chapter,
+      example / reset = chapter,
       prefix-separator = dash,
     }
   },
-  example-prefix / section .code:n = {
+  prefix / section .code:n = {
     \tl_set:Nn \l_@@_example_prefix_tl { \arabic{section} }
     \bool_set_true:N \l_@@_example_prefix_bool
     \keys_set:nn { teachingtools } {
-      reset-example = section,
+      example / reset = section,
       prefix-separator = dash,
     }
   },
-  example-prefix / subsection .code:n = {
+  prefix / subsection .code:n = {
     \tl_set:Nn \l_@@_example_prefix_tl { \arabic{subsection} }
     \bool_set_true:N \l_@@_example_prefix_bool
     \keys_set:nn { teachingtools } {
-      reset-example = subsection,
+      example / reset = subsection,
       prefix-separator = dash,
     }
   },
-  example-prefix / subsubsection .code:n = {
+  prefix / subsubsection .code:n = {
     \tl_set:Nn \l_@@_example_prefix_tl { \arabic{subsubsection} }
     \bool_set_true:N \l_@@_example_prefix_bool
     \keys_set:nn { teachingtools } {
-      reset-example = subsubsection,
+      example / reset = subsubsection,
       prefix-separator = dash,
     }
   },
-  example-prefix / paragraph .code:n = {
+  prefix / paragraph .code:n = {
     \tl_set:Nn \l_@@_example_prefix_tl { \arabic{paragraph} }
     \bool_set_true:N \l_@@_example_prefix_bool
     \keys_set:nn { teachingtools } {
-      reset-example = paragraph,
+      example / reset = paragraph,
       prefix-separator = dash,
     }
   },
-  example-prefix / subparagraph .code:n = {
+  prefix / subparagraph .code:n = {
     \tl_set:Nn \l_@@_example_prefix_tl { \arabic{subparagraph} }
     \bool_set_true:N \l_@@_example_prefix_bool
     \keys_set:nn { teachingtools } {
-      reset-example = subparagraph,
+      example / reset = subparagraph,
       prefix-separator = dash,
     }
   },
-  example-prefix / none .code:n = {
+  prefix / none .code:n = {
     \tl_gclear:N \l_@@_example_prefix_tl 
     \bool_set_false:N \l_@@_example_prefix_bool
   },
-  example-prefix .default:n = none,
-  example-prefix .initial:n = none,
+  prefix .default:n = none,
+  prefix .initial:n = none,
 }
 %    \end{macrocode}
 %\end{macro}
+%\end{macro}
 %
-%\begin{macro}{
-%  \l_@@_question_label_tl ,
-%}
+%\begin{macro}{ \l_@@_question_label_tl }
 % The label on the question environment can be set using this key.  The default
 % is Arabic numerals, and the options \opt{alph} and \opt{roman} are aliases for
 % \opt{lower-alph} and \opt{lower-roman}.
 %    \begin{macrocode}
 \tl_new:N \l_@@_question_label_tl
-\keys_define:nn { teachingtools } {
-  question-label .choice:,
-  question-label / arabic .code:n = {
+\keys_define:nn { teachingtools / question } {
+  label .choice:,
+  label / arabic .code:n = {
     \tl_set:Nn \l_@@_question_label_tl { \arabic{question} }
   },
-  question-label / alph .code:n = {
-    \tl_set:Nn \l_@@_question_label_tl { \alph{question} }
+  label / alph .code:n = {
+    \tl_set:Nn \l_@@_question_label_tl { \int_to_alph:n { \value{question} } }
   },
-  question-label / lower-alph .code:n = {
-    \tl_set:Nn \l_@@_question_label_tl { \alph{question} }
+  label / lower-alph .code:n = {
+    \tl_set:Nn \l_@@_question_label_tl { \int_to_alph:n { \value{question} } }
   },
-  question-label / upper-alph .code:n = {
-    \tl_set:Nn \l_@@_question_label_tl { \Alph{question} }
+  label / upper-alph .code:n = {
+    \tl_set:Nn \l_@@_question_label_tl { \int_to_Alph:n { \value{question} } }
   },
-  question-label / roman .code:n = {
+  label / roman .code:n = {
     \tl_set:Nn \l_@@_question_label_tl { \roman{question} }
   },
-  question-label / lower-roman .code:n = {
+  label / lower-roman .code:n = {
     \tl_set:Nn \l_@@_question_label_tl { \roman{question} }
   },
-  question-label / upper-roman .code:n = {
+  label / upper-roman .code:n = {
     \tl_set:Nn \l_@@_question_label_tl { \Roman{question} }
   },
-  question-label / footnote-symbol .code:n = {
+  label / footnote-symbol .code:n = {
     \tl_set:Nn \l_@@_question_label_tl { \fnsymbol{question} }
   },
-  question-label .default:n = arabic,
-  question-label .initial:n = arabic,
+  label .default:n = arabic,
+  label .initial:n = arabic,
 }
 %    \end{macrocode}
 %\end{macro}
 %
-%\begin{macro}{
-%  \l_@@_example_label_tl
-%}
+%\begin{macro}{ \l_@@_example_label_tl }
 % The label on the example environment can be set using this key.  The default
 % is uppercase Latin characters; note that this presently implies a limit of 26
 % examples unless changed to a different label style.
 %    \begin{macrocode}
 \tl_new:N \l_@@_example_label_tl
-\keys_define:nn { teachingtools } {
-  example-label .choice:,
-  example-label / arabic .code:n = {
+\keys_define:nn { teachingtools / example } {
+  label .choice:,
+  label / arabic .code:n = {
     \tl_set:Nn \l_@@_example_label_tl { \arabic{example} }
   },
-  example-label / alph .code:n = {
-    \tl_set:Nn \l_@@_example_label_tl { \alph{example} }
+  label / alph .code:n = {
+    \tl_set:Nn \l_@@_example_label_tl { \int_to_alph:n { \value{example} } }
   },
-  example-label / lower-alph .code:n = {
-    \tl_set:Nn \l_@@_example_label_tl { \alph{example} }
+  label / lower-alph .code:n = {
+    \tl_set:Nn \l_@@_example_label_tl { \int_to_alph:n { \value{example} } }
   },
-  example-label / upper-alph .code:n = {
-    \tl_set:Nn \l_@@_example_label_tl { \Alph{example} }
+  label / upper-alph .code:n = {
+    \tl_set:Nn \l_@@_example_label_tl {  \int_to_Alph:n { \value{example} } }
   },
-  example-label / roman .code:n = {
+  label / roman .code:n = {
     \tl_set:Nn \l_@@_example_label_tl { \roman{example} }
   },
-  example-label / lower-roman .code:n = {
+  label / lower-roman .code:n = {
     \tl_set:Nn \l_@@_example_label_tl { \roman{example} }
   },
-  example-label / upper-roman .code:n = {
+  label / upper-roman .code:n = {
     \tl_set:Nn \l_@@_example_label_tl { \Roman{example} }
   },
-  example-label / footnote-symbol .code:n = {
+  label / footnote-symbol .code:n = {
     \tl_set:Nn \l_@@_example_label_tl { \fnsymbol{example} }
   },
-  example-label .default:n = upper-alph,
-  example-label .initial:n = upper-alph,
+  label .default:n = upper-alph,
+  label .initial:n = upper-alph,
 }
 %    \end{macrocode}
 %\end{macro}
 %
-%\begin{macro}{
-%  \l_@@_suffix_character_str
-%}
+%\begin{macro}{ \l_@@_suffix_character_str }
 % The \opt{suffix-character} is a character appended after the environment
 % number.
 %    \begin{macrocode}
@@ -664,6 +708,7 @@ This work consists of the file  teachingtools.dtx
 }
 %    \end{macrocode}
 %\end{macro}
+%
 % \subsection{Dimensions and lengths}
 % A number of dimensions and lengths are used internally to define spacing
 % around each environment.  Each environment has its own skip length, initially
@@ -697,17 +742,18 @@ This work consists of the file  teachingtools.dtx
 % The \cs{question} environment is used to create a list of questions.  The
 % starred version is unnumbered and does not increment the question counter.
 %    \begin{macrocode}
-\NewDocumentEnvironment { question } { s } {
-  \par \skip_vertical:N \questionbefore
+\NewDocumentEnvironment { question } { s O { } } {
+  \group_begin:
   \IfBooleanTF #1 
-    { { \bfseries Question.\par\nopagebreak } }
-    {
-      \refstepcounter{question}
-      {\bfseries Question~\@@_print_question: \par\nopagebreak}
-    }
+    { \bool_set_false:N \l_@@_numbered_question_bool }
+    { \bool_set_true:N \l_@@_numbered_question_bool }
+
+  \keys_set:nn { teachingtools / question } {#2}
+  \@@_print_question:
+  
   \begin{itshape}
 }
-{\end{itshape}\par \skip_vertical:N \questionafter}
+{\end{itshape}\group_end: \par \skip_vertical:N \questionafter}
 \cs_new:cpn {question*} {\question*}
 \cs_new_eq:cN {endquestion*} \endquestion
 %    \end{macrocode}
@@ -731,16 +777,16 @@ This work consists of the file  teachingtools.dtx
 % The \cs{example} environment is used to create a list of examples.  The
 % starred version is unnumbered and does not increment the example counter.
 %    \begin{macrocode}
-\NewDocumentEnvironment { example } { s } {
-  \par\vspace\examplebefore
+\NewDocumentEnvironment { example } { s O { } } {
+  \group_begin:
   \IfBooleanTF #1 
-    { { \bfseries Example.\par\nopagebreak } }
-    {
-      \refstepcounter{example}
-      {\bfseries Example~\@@_print_example: \par\nopagebreak}
-    }
+    { \bool_set_false:N \l_@@_numbered_example_bool }
+    { \bool_set_true:N \l_@@_numbered_example_bool }
+
+  \keys_set:nn { teachingtools / example } {#2}
+  \@@_print_example:
 }
-{\par\vspace\exampleafter}
+{\group_end: \par\vspace\exampleafter}
 \cs_new:cpn {example*} {\example*}
 \cs_new_eq:cN {endexample*} \endexample
 %    \end{macrocode}

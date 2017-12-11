@@ -26,8 +26,9 @@
 \usepackage{teachingtools}
 \ttsetup{
   % example-label = upper-alph,
-  % question-label = lower-alph,
-  % question-prefix = section,
+  % question / label = lower-alph,
+  question / prefix = section,
+  % question / reset = none,
   % prefix-separator = dash,
   % reset-all = none,
   % suffix-character = bracket,
@@ -54,9 +55,17 @@
 
 \section{A section}
 
-\begin{question}
+\begin{question}\label{qu:section}
 The question in a section
 \end{question}
+
+\begin{example}
+    This is an example of the \texttt{example} environment.
+\end{example}
+
+\begin{example}
+    This is an example of the \texttt{example} environment.
+\end{example}
 
 \begin{example}
     This is an example of the \texttt{example} environment.
@@ -68,11 +77,12 @@ The question in a section
 The question in a subsection
 \end{question}
 
+
 \begin{example*}
     This is an example of the \texttt{example*} environment.
 \end{example*}
 
-\begin{question}
+\begin{question}\label{qu:confuse}
 Another question in a subsection
 \end{question}
 
@@ -138,6 +148,8 @@ What is this question?
 \begin{question}
 Another question in another section
 \end{question}
+
+See also \ref{qu:section}.
 
 \begin{question}
 Another question in another section
