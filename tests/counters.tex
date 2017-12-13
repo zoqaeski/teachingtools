@@ -35,6 +35,7 @@
 }
 
 % \usepackage[foo]{siunitx}
+% \renewcommand{\thequestion}{\printqulabelformat}
 
 %% Penalties
 \hyphenpenalty=2500
@@ -52,10 +53,9 @@
 
 \begin{document}
 
-
 \section{A section}
 
-\begin{question}\label{qu:section}
+\begin{question}\label{qu:test}
 The question in a section
 \end{question}
 
@@ -82,7 +82,7 @@ The question in a subsection
     This is an example of the \texttt{example*} environment.
 \end{example*}
 
-\begin{question}\label{qu:confuse}
+\begin{question}
 Another question in a subsection
 \end{question}
 
@@ -149,7 +149,7 @@ What is this question?
 Another question in another section
 \end{question}
 
-See also \ref{qu:section}.
+See also \ref{qu:test}.
 
 \begin{question}
 Another question in another section

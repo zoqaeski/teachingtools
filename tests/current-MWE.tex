@@ -1,3 +1,5 @@
+    % arara: lualatex
+    % arara: lualatex
     \documentclass{article}
     \usepackage{xparse}
     \usepackage{expl3}
@@ -6,52 +8,302 @@
 
     \setlength\parindent{0pt}
 
-    \begin{document}
-
     \ExplSyntaxOn
 
+    \cs_new:Nn \__teachingtools_print_question: {
+        \str_clear_new:N \l__teachingtools_question_str
+        \str_put_left:Nn \l__teachingtools_question_str { Question }
+        \bool_if:NT \l__teachingtools_numbered_question_bool {
+            \refstepcounter{question}
+            \str_put_right:Nn \l__teachingtools_question_str { ~ }
+            \__teachingtools_print_question_label:
+            \str_put_right:Nx \l__teachingtools_question_str { \l__teachingtools_question_label_str }
+        }
+        \str_put_right:Nx \l__teachingtools_question_str { \l__teachingtools_suffix_character_str }
+
+        % Prints format string of label in terminal: how can I use this to change the
+        % printing of \refl{qu:label}?
+        % \tl_show:N \l__teachingtools_question_label_format_tl
+
+        \par \skip_vertical:N \questionbefore
+        \group_begin:
+        \bfseries \l__teachingtools_question_str \par\nopagebreak
+        \group_end:
+    }
+    \cs_new:Nn \__teachingtools_print_question_label: {
+        \str_clear_new:N \l__teachingtools_question_label_str
+        \tl_clear_new:N \l__teachingtools_question_label_format_tl
+        \bool_if:NT \l__teachingtools_question_prefix_bool {
+            \str_put_right:Nx \l__teachingtools_question_label_str { \l__teachingtools_question_prefix_tl }
+            \str_put_right:Nx \l__teachingtools_question_label_str { \l__teachingtools_prefix_separator_str }
+            \tl_put_right:NV \l__teachingtools_question_label_format_tl { \l__teachingtools_question_prefix_tl }
+            \tl_put_right:NV \l__teachingtools_question_label_format_tl { \l__teachingtools_prefix_separator_str }
+        }
+        \str_put_right:Nx \l__teachingtools_question_label_str { \l__teachingtools_question_label_tl }
+        \tl_put_right:NV \l__teachingtools_question_label_format_tl { \l__teachingtools_question_label_tl }
+    }
     \newcounter{question}
-    \keys_define:nn { teachingtools } {
-        reset-question .default:n = section,
-        reset-question .choices:nn = {
+    \keys_define:nn { teachingtools / question } {
+        reset .default:n = section,
+        reset .choices:nn = {
             part, chapter, section, subsection, subsubsection, paragraph, subparagraph
         }
         {
             \counterwithin*{question}{ \tl_to_str:N \l_keys_choice_tl }
         },
-        reset-question / none .code:n = {
+        reset / none .code:n = {
             \counterwithout*{question}{section}
         },
     }
-
-    \tl_new:N \l_@@_question_prefix_tl
+    \bool_new:N \l__teachingtools_numbered_question_bool
     \keys_define:nn { teachingtools } {
-        question-prefix .choices:nn = { 
-            part, chapter, section, subsection, subsubsection, paragraph, subparagraph
-        }
-        {
-            \tl_set:Nn \l_@@_question_prefix_tl { \arabic{ \tl_to_str:N \l_keys_choice_tl } }
-            \keys_set:nn { teachingtools } { reset-question = \tl_to_str:N \l_keys_choice_tl }
+        question / number .code:n = {
+            \int_set_eq:NN \l_tmpa_int #1
+            \int_decr:N \l_tmpa_int
+            \setcounter{question}{ \int_use:N \l_tmpa_int }
         },
-        question-prefix / none .code:n = {
-            \tl_gclear:N \l_@@_question_prefix_tl 
-        },
-        question-prefix .default:n = none,
-        question-prefix .initial:n = none,
     }
-    \tl_put_right:Nn \l_@@_question_title_tl { \l_@@_question_prefix_tl }
+    \str_new:N \l__teachingtools_prefix_separator_str
+    \keys_define:nn { teachingtools } {
+        prefix-separator .choice:,
+        prefix-separator / dash .code:n = {
+            \str_set:Nn \l__teachingtools_prefix_separator_str { - }
+        },
+        prefix-separator / dot .code:n = {
+            \str_set:Nn \l__teachingtools_prefix_separator_str { . }
+        },
+        prefix-separator / colon .code:n = {
+            \str_set:Nx \l__teachingtools_prefix_separator_str { \c_colon_str }
+        },
+        prefix-separator / none .code:n = {
+            \str_gclear:N \l__teachingtools_prefix_separator_str
+        },
+        prefix-separator .default:n = none,
+        prefix-separator .initial:n = none,
+    }
+    \tl_new:N \l__teachingtools_question_prefix_tl
+    \bool_new:N \l__teachingtools_question_prefix_bool
+    \keys_define:nn { teachingtools / question } {
+        prefix .choice:,
+        prefix / part .code:n = {
+            \tl_set:Nn \l__teachingtools_question_prefix_tl { \thepart }
+            \keys_set:nn { teachingtools } {
+                question / reset = part,
+                prefix-separator = dash,
+            }
+            \bool_set_true:N \l__teachingtools_question_prefix_bool
+        },
+        prefix / chapter .code:n = {
+            \tl_set:Nn \l__teachingtools_question_prefix_tl { \thechapter }
+            \keys_set:nn { teachingtools } {
+                question / reset = chapter,
+                prefix-separator = dash,
+            }
+            \bool_set_true:N \l__teachingtools_question_prefix_bool
+        },
+        prefix / section .code:n = {
+            \tl_set:Nn \l__teachingtools_question_prefix_tl { \thesection }
+            \keys_set:nn { teachingtools } {
+                question / reset = section,
+                prefix-separator = dash,
+            }
+            \bool_set_true:N \l__teachingtools_question_prefix_bool
+        },
+        prefix / subsection .code:n = {
+            \tl_set:Nn \l__teachingtools_question_prefix_tl { \thesubsection }
+            \keys_set:nn { teachingtools } {
+                question / reset = subsection,
+                prefix-separator = dash,
+            }
+            \bool_set_true:N \l__teachingtools_question_prefix_bool
+        },
+        prefix / subsubsection .code:n = {
+            \tl_set:Nn \l__teachingtools_question_prefix_tl { \thesubsubsection }
+            \keys_set:nn { teachingtools } {
+                question / reset = subsubsection,
+                prefix-separator = dash,
+            }
+            \bool_set_true:N \l__teachingtools_question_prefix_bool
+        },
+        prefix / paragraph .code:n = {
+            \tl_set:Nn \l__teachingtools_question_prefix_tl { \theparagraph }
+            \keys_set:nn { teachingtools } {
+                question / reset = paragraph,
+                prefix-separator = dash,
+            }
+            \bool_set_true:N \l__teachingtools_question_prefix_bool
+        },
+        prefix / subparagraph .code:n = {
+            \tl_set:Nn \l__teachingtools_question_prefix_tl { \thesubparagraph }
+            \keys_set:nn { teachingtools } {
+                question / reset = subparagraph,
+                prefix-separator = dash,
+            }
+            \bool_set_true:N \l__teachingtools_question_prefix_bool
+        },
+        prefix / none .code:n = {
+            \tl_gclear:N \l__teachingtools_question_prefix_tl
+        },
+        prefix .default:n = none,
+        prefix .initial:n = none,
+    }
+    \tl_new:N \l__teachingtools_question_label_tl
+    \keys_define:nn { teachingtools / question } {
+        label .choice:,
+        label / arabic .code:n = {
+            \tl_set:Nn \l__teachingtools_question_label_tl { \arabic{question} }
+        },
+        label / alph .code:n = {
+            \tl_set:Nn \l__teachingtools_question_label_tl { \int_to_alph:n { \value{question} } }
+        },
+        label / lower-alph .code:n = {
+            \tl_set:Nn \l__teachingtools_question_label_tl { \int_to_alph:n { \value{question} } }
+        },
+        label / upper-alph .code:n = {
+            \tl_set:Nn \l__teachingtools_question_label_tl { \int_to_Alph:n { \value{question} } }
+        },
+        label / roman .code:n = {
+            \tl_set:Nn \l__teachingtools_question_label_tl { \roman{question} }
+        },
+        label / lower-roman .code:n = {
+            \tl_set:Nn \l__teachingtools_question_label_tl { \roman{question} }
+        },
+        label / upper-roman .code:n = {
+            \tl_set:Nn \l__teachingtools_question_label_tl { \Roman{question} }
+        },
+        label .default:n = arabic,
+        label .initial:n = arabic,
+    }
+    \str_new:N \l__teachingtools_suffix_character_str
+    \keys_define:nn { teachingtools } {
+        suffix-character .choice:,
+        suffix-character / dot .code:n = {
+            \str_set:Nn \l__teachingtools_suffix_character_str { . }
+        },
+        suffix-character / colon .code:n = {
+            \str_set:Nx \l__teachingtools_suffix_character_str { \c_colon_str }
+        },
+        suffix-character / bracket .code:n = {
+            \str_set:Nx \l__teachingtools_suffix_character_str { ) }
+        },
+        suffix-character / none .code:n = {
+            \str_gclear:N \l__teachingtools_suffix_character_str
+        },
+        suffix-character .default:n = dot,
+        suffix-character .initial:n = dot,
+    }
+    \skip_new:N \questionbefore
+    \skip_new:N \questionafter
+
+    \skip_set:Nn \questionbefore { 1.0ex plus -1ex minus -0.25ex }
+    \skip_set:Nn \questionafter { 1ex plus 0.25ex }
+
+    \NewDocumentEnvironment { question } { s O { } } {
+        \group_begin:
+        \IfBooleanTF #1
+        { \bool_set_false:N \l__teachingtools_numbered_question_bool }
+        { \bool_set_true:N \l__teachingtools_numbered_question_bool }
+
+        \keys_set:nn { teachingtools / question } {#2}
+        \__teachingtools_print_question:
+
+        \begin{itshape}
+        }
+    {\end{itshape}\group_end: \par \skip_vertical:N \questionafter}
+    \cs_new:cpn {question*} {\question*}
+    \cs_new_eq:cN {endquestion*} \endquestion
 
     \NewDocumentCommand \ttsetup { m } {
         \keys_set:nn { teachingtools } {#1}
     }
+    \ProcessKeysOptions { teachingtools }
     \ExplSyntaxOff
 
+    \begin{document}
 
+    % Most options set with `\ttsetup` can also be applied on specific instances
+    % of the `question` environment.  Of most use in this scenario is the
+    % `number` option, which has the same effect as `\setcounter{question}`; the
+    % others are of limited use but I've made them available anyway.
     \ttsetup{
-      % reset-all = false,
-      % reset-question = subsection,
-        question-prefix = section
+        % prefix-separator = dash,             % (dash|dot|colon|none)
+        question / prefix = section,           % (part|chapter|section|subsection|subsubsection|paragraph|subparagraph|none)
+        question / reset = none,               % (part|chapter|section|subsection|subsubsection|paragraph|subparagraph|none)
+        question / label = upper-alph,         % (arabic|lower-alph|upper-alph|lower-roman|upper-roman)
+        suffix-character = bracket,            % (dot|colon|bracket|none)
+        % question / number = 1,               % any integer
     }
 
+    \section{A section}
+
+    \begin{question}
+        The question in a section
+    \end{question}
+
+    \subsection{A subsection}
+
+    \begin{question}
+        The question in a subsection
+    \end{question}
+
+    \begin{question}[number = 7]
+        Another question in a subsection
+    \end{question}
+
+    \subsubsection{A subsubsection}
+
+    \begin{question}\label{qu:test}
+        The question in a subsubsection
+    \end{question}
+
+    \begin{question}
+        Another question in a subsubsection
+    \end{question}
+
+    \section{Another section}
+
+    \begin{question}
+        Another question in another section
+    \end{question}
+
+    See also \ref{qu:test}.
+
+    \begin{question}
+        Another question in another section
+    \end{question}
+
+    \subsection{A subsection}
+
+    \begin{question}
+        The question in a subsection
+    \end{question}
+
+    \begin{question}
+        Another question in a subsection
+    \end{question}
+
+    \begin{question}
+        Another question in a subsection
+    \end{question}
+
+    \subsubsection{A subsubsection}
+
+    \begin{question}
+        The question in a subsubsection
+    \end{question}
+
+    \begin{question}
+        Another question in a subsubsection
+    \end{question}
+
+    \subsubsection{A subsubsection}
+
+    \begin{question}
+        The question in a subsubsection
+    \end{question}
+
+    \begin{question}
+        Another question in a subsubsection
+    \end{question}
 
     \end{document}

@@ -237,32 +237,38 @@ This work consists of the file  teachingtools.dtx
 % required.
 %    \begin{macrocode}
 \cs_new:Nn \@@_print_question: {
-  \str_clear:N \l_tmpa_str
+  \str_clear_new:N \l_@@_question_str
+  \str_put_left:Nn \l_@@_question_str { Question }
   \bool_if:NT \l_@@_numbered_question_bool {
     \refstepcounter{question}
-    \str_put_left:Nn \l_tmpa_str { ~ }
+    \str_put_right:Nn \l_@@_question_str { ~ }
     \@@_print_question_label:
-    \str_put_right:Nx \l_tmpa_str { \l_tmpb_str }
+    \str_put_right:Nx \l_@@_question_str { \l_@@_question_label_str }
   }
-  \str_put_right:Nx \l_tmpa_str { \l_@@_suffix_character_str }
-  \par \skip_vertical:N \questionbefore
+  \str_put_right:Nx \l_@@_question_str { \l_@@_suffix_character_str }
+
+  \par \skip_vertical:N \l_@@_questionbefore_skip
   \group_begin:
-  \bfseries Question\l_tmpa_str \par\nopagebreak
+  \bfseries \l_@@_question_str \par\nopagebreak
   \group_end:
 }
 %    \end{macrocode}
 %\end{macro}
 %
-%\begin{macro}{ \@@_print_question_label }
+%\begin{macro}{ \@@_print_question_label: }
 % This function prints out the \texttt{question} label.
 %    \begin{macrocode}
 \cs_new:Nn \@@_print_question_label: {
-  \str_clear:N \l_tmpb_str
+  \str_clear_new:N \l_@@_question_label_str
+  \tl_clear_new:N \l_@@_question_label_format_tl
   \bool_if:NT \l_@@_question_prefix_bool {
-    \str_put_right:Nx \l_tmpb_str { \l_@@_question_prefix_tl }
-    \str_put_right:Nx \l_tmpb_str { \l_@@_prefix_separator_str }
+    \str_put_right:Nx \l_@@_question_label_str { \l_@@_question_prefix_tl }
+    \str_put_right:Nx \l_@@_question_label_str { \l_@@_prefix_separator_str }
+    \tl_put_right:NV \l_@@_question_label_format_tl { \l_@@_question_prefix_tl }
+    \tl_put_right:NV \l_@@_question_label_format_tl { \l_@@_prefix_separator_str }
   }
-  \str_put_right:Nx \l_tmpb_str { \l_@@_question_label_tl }
+  \str_put_right:Nx \l_@@_question_label_str { \l_@@_question_label_tl }
+  \tl_put_right:NV \l_@@_question_label_format_tl { \l_@@_question_label_tl }
 }
 %    \end{macrocode}
 %\end{macro}
@@ -283,7 +289,7 @@ This work consists of the file  teachingtools.dtx
     \str_put_right:Nx \l_tmpa_str { \l_@@_example_label_tl }
   }
   \str_put_right:Nx \l_tmpa_str { \l_@@_suffix_character_str }
-  \par \skip_vertical:N \examplebefore
+  \par \skip_vertical:N \l_@@_examplebefore_skip
   \group_begin:
   \bfseries Example\l_tmpa_str \par\nopagebreak
   \group_end:
@@ -394,7 +400,7 @@ This work consists of the file  teachingtools.dtx
 % The environment counters can be set to specific values using the \opt{number}
 % option.  This is only really useful when passed as an optional argument to an
 % environment instance; note that normal counter incrementing still applies for
-% subsequent instances.
+% subsequent instances.  The number input must be decremented by one as the 
 %    \begin{macrocode}
 \keys_define:nn { teachingtools } {
   question / number .code:n = {
@@ -467,7 +473,7 @@ This work consists of the file  teachingtools.dtx
 \keys_define:nn { teachingtools / question } {
   prefix .choice:, 
   prefix / part .code:n = {
-    \tl_set:Nn \l_@@_question_prefix_tl { \arabic{part} }
+    \tl_set:Nn \l_@@_question_prefix_tl { \thepart }
     \keys_set:nn { teachingtools } { 
       question / reset = part,
       prefix-separator = dash,
@@ -475,7 +481,7 @@ This work consists of the file  teachingtools.dtx
     \bool_set_true:N \l_@@_question_prefix_bool
   },
   prefix / chapter .code:n = {
-    \tl_set:Nn \l_@@_question_prefix_tl { \arabic{chapter} }
+    \tl_set:Nn \l_@@_question_prefix_tl { \thechapter }
     \keys_set:nn { teachingtools } { 
       question / reset = chapter,
       prefix-separator = dash,
@@ -483,7 +489,7 @@ This work consists of the file  teachingtools.dtx
     \bool_set_true:N \l_@@_question_prefix_bool
   },
   prefix / section .code:n = {
-    \tl_set:Nn \l_@@_question_prefix_tl { \arabic{section} }
+    \tl_set:Nn \l_@@_question_prefix_tl { \thesection }
     \keys_set:nn { teachingtools } {
       question / reset = section,
       prefix-separator = dash,
@@ -491,7 +497,7 @@ This work consists of the file  teachingtools.dtx
     \bool_set_true:N \l_@@_question_prefix_bool
   },
   prefix / subsection .code:n = {
-    \tl_set:Nn \l_@@_question_prefix_tl { \arabic{subsection} }
+    \tl_set:Nn \l_@@_question_prefix_tl { \thesubsection }
     \keys_set:nn { teachingtools } {
       question / reset = subsection,
       prefix-separator = dash,
@@ -499,7 +505,7 @@ This work consists of the file  teachingtools.dtx
     \bool_set_true:N \l_@@_question_prefix_bool
   },
   prefix / subsubsection .code:n = {
-    \tl_set:Nn \l_@@_question_prefix_tl { \arabic{subsubsection} }
+    \tl_set:Nn \l_@@_question_prefix_tl { \thesubsubsection }
     \keys_set:nn { teachingtools } {
       question / reset = subsubsection,
       prefix-separator = dash,
@@ -507,7 +513,7 @@ This work consists of the file  teachingtools.dtx
     \bool_set_true:N \l_@@_question_prefix_bool
   },
   prefix / paragraph .code:n = {
-    \tl_set:Nn \l_@@_question_prefix_tl { \arabic{paragraph} }
+    \tl_set:Nn \l_@@_question_prefix_tl { \theparagraph }
     \keys_set:nn { teachingtools } {
       question / reset = paragraph,
       prefix-separator = dash,
@@ -515,7 +521,7 @@ This work consists of the file  teachingtools.dtx
     \bool_set_true:N \l_@@_question_prefix_bool
   },
   prefix / subparagraph .code:n = {
-    \tl_set:Nn \l_@@_question_prefix_tl { \arabic{subparagraph} }
+    \tl_set:Nn \l_@@_question_prefix_tl { \thesubparagraph }
     \keys_set:nn { teachingtools } {
       question / reset = subparagraph,
       prefix-separator = dash,
@@ -542,7 +548,7 @@ This work consists of the file  teachingtools.dtx
 \keys_define:nn { teachingtools / example } {
   prefix .choice:, 
   prefix / part .code:n = {
-    \tl_set:Nn \l_@@_example_prefix_tl { \arabic{part} }
+    \tl_set:Nn \l_@@_example_prefix_tl { \thepart }
     \bool_set_true:N \l_@@_example_prefix_bool
     \keys_set:nn { teachingtools } { 
       example / reset = part,
@@ -550,7 +556,7 @@ This work consists of the file  teachingtools.dtx
     }
   },
   prefix / chapter .code:n = {
-    \tl_set:Nn \l_@@_example_prefix_tl { \arabic{chapter} }
+    \tl_set:Nn \l_@@_example_prefix_tl { \thechapter }
     \bool_set_true:N \l_@@_example_prefix_bool
     \keys_set:nn { teachingtools } { 
       example / reset = chapter,
@@ -558,7 +564,7 @@ This work consists of the file  teachingtools.dtx
     }
   },
   prefix / section .code:n = {
-    \tl_set:Nn \l_@@_example_prefix_tl { \arabic{section} }
+    \tl_set:Nn \l_@@_example_prefix_tl { \thesection }
     \bool_set_true:N \l_@@_example_prefix_bool
     \keys_set:nn { teachingtools } {
       example / reset = section,
@@ -566,7 +572,7 @@ This work consists of the file  teachingtools.dtx
     }
   },
   prefix / subsection .code:n = {
-    \tl_set:Nn \l_@@_example_prefix_tl { \arabic{subsection} }
+    \tl_set:Nn \l_@@_example_prefix_tl { \thesubsection }
     \bool_set_true:N \l_@@_example_prefix_bool
     \keys_set:nn { teachingtools } {
       example / reset = subsection,
@@ -574,7 +580,7 @@ This work consists of the file  teachingtools.dtx
     }
   },
   prefix / subsubsection .code:n = {
-    \tl_set:Nn \l_@@_example_prefix_tl { \arabic{subsubsection} }
+    \tl_set:Nn \l_@@_example_prefix_tl { \thesubsubsection }
     \bool_set_true:N \l_@@_example_prefix_bool
     \keys_set:nn { teachingtools } {
       example / reset = subsubsection,
@@ -582,7 +588,7 @@ This work consists of the file  teachingtools.dtx
     }
   },
   prefix / paragraph .code:n = {
-    \tl_set:Nn \l_@@_example_prefix_tl { \arabic{paragraph} }
+    \tl_set:Nn \l_@@_example_prefix_tl { \theparagraph }
     \bool_set_true:N \l_@@_example_prefix_bool
     \keys_set:nn { teachingtools } {
       example / reset = paragraph,
@@ -590,7 +596,7 @@ This work consists of the file  teachingtools.dtx
     }
   },
   prefix / subparagraph .code:n = {
-    \tl_set:Nn \l_@@_example_prefix_tl { \arabic{subparagraph} }
+    \tl_set:Nn \l_@@_example_prefix_tl { \thesubparagraph }
     \bool_set_true:N \l_@@_example_prefix_bool
     \keys_set:nn { teachingtools } {
       example / reset = subparagraph,
@@ -714,25 +720,25 @@ This work consists of the file  teachingtools.dtx
 % around each environment.  Each environment has its own skip length, initially
 % set to the value of that for the \texttt{question} environment.
 %    \begin{macrocode}
-\skip_new:N \questionbefore
-\skip_new:N \questionafter
-\skip_new:N \answerbefore
-\skip_new:N \answerafter
-\skip_new:N \examplebefore
-\skip_new:N \exampleafter
-\skip_new:N \noticebefore
-\skip_new:N \noticeafter
+\skip_new:N \l_@@_questionbefore_skip
+\skip_new:N \l_@@_questionafter_skip
+\skip_new:N \l_@@_answerbefore_skip
+\skip_new:N \l_@@_answerafter_skip
+\skip_new:N \l_@@_examplebefore_skip
+\skip_new:N \l_@@_exampleafter_skip
+\skip_new:N \l_@@_noticebefore_skip
+\skip_new:N \l_@@_noticeafter_skip
 
-\skip_set:Nn \questionbefore { 1.0ex plus -1ex minus -0.25ex }
-\skip_set:Nn \questionafter { 1ex plus 0.25ex }
+\skip_set:Nn \l_@@_questionbefore_skip { 1.0ex plus -1ex minus -0.25ex }
+\skip_set:Nn \l_@@_questionafter_skip { 1ex plus 0.25ex }
 
-\skip_set_eq:NN \answerbefore \questionbefore
-\skip_set_eq:NN \examplebefore \questionbefore
-\skip_set_eq:NN \noticebefore \questionbefore
+\skip_set_eq:NN \l_@@_answerbefore_skip \l_@@_questionbefore_skip
+\skip_set_eq:NN \l_@@_examplebefore_skip \l_@@_questionbefore_skip
+\skip_set_eq:NN \l_@@_noticebefore_skip \l_@@_questionbefore_skip
 
-\skip_set_eq:NN \answerafter \questionafter
-\skip_set_eq:NN \exampleafter \questionafter
-\skip_set_eq:NN \noticeafter \questionafter
+\skip_set_eq:NN \l_@@_answerafter_skip \l_@@_questionafter_skip
+\skip_set_eq:NN \l_@@_exampleafter_skip \l_@@_questionafter_skip
+\skip_set_eq:NN \l_@@_noticeafter_skip \l_@@_questionafter_skip
 %    \end{macrocode}
 %
 % \subsection{Environments}
@@ -753,7 +759,7 @@ This work consists of the file  teachingtools.dtx
   
   \begin{itshape}
 }
-{\end{itshape}\group_end: \par \skip_vertical:N \questionafter}
+{\end{itshape}\group_end: \par \skip_vertical:N \l_@@_questionafter_skip}
 \cs_new:cpn {question*} {\question*}
 \cs_new_eq:cN {endquestion*} \endquestion
 %    \end{macrocode}
@@ -763,11 +769,11 @@ This work consists of the file  teachingtools.dtx
 % The \cs{answer} environment is used to format the answer.  
 %    \begin{macrocode}
 \NewDocumentEnvironment { answer } { s } {
-  \par\vspace\answerbefore
+  \par\vspace\l_@@_answerbefore_skip
   \setcounter{equation}{0}
     { \bfseries Solution:\par\nopagebreak }
 }
-{\par\vspace\answerafter}
+{\par\vspace\l_@@_answerafter_skip}
 \cs_new:cpn {answer*} {\example*}
 \cs_new_eq:cN {endanswer*} \endexample
 %    \end{macrocode}
@@ -786,7 +792,7 @@ This work consists of the file  teachingtools.dtx
   \keys_set:nn { teachingtools / example } {#2}
   \@@_print_example:
 }
-{\group_end: \par\vspace\exampleafter}
+{\group_end: \par\vspace\l_@@_exampleafter_skip}
 \cs_new:cpn {example*} {\example*}
 \cs_new_eq:cN {endexample*} \endexample
 %    \end{macrocode}
