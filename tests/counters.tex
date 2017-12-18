@@ -26,7 +26,7 @@
 \usepackage{teachingtools}
 \ttsetup{
   % example-label = upper-alph,
-  % question / label = lower-alph,
+  question / label = lower-alph,
   question / prefix = section,
   % question / reset = none,
   % prefix-separator = dash,
@@ -59,17 +59,7 @@
 The question in a section
 \end{question}
 
-\begin{example}
-    This is an example of the \texttt{example} environment.
-\end{example}
-
-\begin{example}
-    This is an example of the \texttt{example} environment.
-\end{example}
-
-\begin{example}
-    This is an example of the \texttt{example} environment.
-\end{example}
+\thequestion
 
 \subsection{A subsection}
 
@@ -77,63 +67,35 @@ The question in a section
 The question in a subsection
 \end{question}
 
-
-\begin{example*}
-    This is an example of the \texttt{example*} environment.
-\end{example*}
-
-\begin{question}
+\begin{question}[label = lower-roman]\label{qu:test2}
 Another question in a subsection
 \end{question}
 
-\begin{example}
-    This is an example of the \texttt{example} environment.
-\end{example}
+\thequestion
 
 \subsubsection{A subsubsection}
 
-\begin{question*}
-A starred question in a subsubsection
-\end{question*}
-
-A counter: \arabic{subsubsection}
-
-\begin{example}
-    This is an example of the \texttt{example} environment.
-\end{example}
-
-
-\begin{question}
+\begin{question}\label{qu:test3}
 The question in a subsubsection
 \end{question}
+
+\thequestion
 
 \begin{question}
 Another question in a subsubsection
 \end{question}
 
-\begin{example}
-    This is an example of the \texttt{example} environment.
-\end{example}
-
 \subsubsection{A subsubsection}
 
 \begin{question}
 The question in a subsubsection
 \end{question}
-
-\begin{example}
-    This is an example of the \texttt{example} environment.
-\end{example}
 
 \begin{question}
 Another question in a subsubsection
 \end{question}
 
 \subsection{Another subsection}
-
-\begin{example}
-    This is an example of the \texttt{example} environment.
-\end{example}
 
 \begin{question}
 Another question in a subsection
@@ -145,19 +107,15 @@ What is this question?
 
 \section{Another section}
 
-\begin{question}
+\begin{question}\label{qu:anothertest}
 Another question in another section
 \end{question}
 
-See also \ref{qu:test}.
+See also \ref{qu:test} and \ref{qu:test2}, \ref{qu:test3}, \ref{qu:anothertest}.
 
 \begin{question}
 Another question in another section
 \end{question}
-
-\begin{example}
-    This is an example of the \texttt{example} environment.
-\end{example}
 
 \subsection{A subsection}
 
@@ -169,10 +127,6 @@ The question in a subsection
 Another question in a subsection
 \end{question}
 
-\begin{example}
-    This is an example of the \texttt{example} environment.
-\end{example}
-
 \begin{question}
 Another question in a subsection
 \end{question}
@@ -187,10 +141,6 @@ The question in a subsubsection
 Another question in a subsubsection
 \end{question}
 
-\begin{example}
-    This is an example of the \texttt{example} environment.
-\end{example}
-
 \subsubsection{A subsubsection}
 
 \begin{question}
@@ -200,9 +150,5 @@ The question in a subsubsection
 \begin{question}
 Another question in a subsubsection
 \end{question}
-
-\begin{example}
-    This is an example of the \texttt{example} environment.
-\end{example}
 
 \end{document}

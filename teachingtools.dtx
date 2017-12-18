@@ -237,6 +237,7 @@ This work consists of the file  teachingtools.dtx
 % required.
 %    \begin{macrocode}
 \cs_new:Nn \@@_print_question: {
+  \@@_generate_question_label_format:
   \str_clear_new:N \l_@@_question_str
   \str_put_left:Nn \l_@@_question_str { Question }
   \bool_if:NT \l_@@_numbered_question_bool {
@@ -246,6 +247,9 @@ This work consists of the file  teachingtools.dtx
     \str_put_right:Nx \l_@@_question_str { \l_@@_question_label_str }
   }
   \str_put_right:Nx \l_@@_question_str { \l_@@_suffix_character_str }
+
+  % \tl_show:N { \g_@@_question_label_format_tl }
+
 
   \par \skip_vertical:N \l_@@_questionbefore_skip
   \group_begin:
@@ -260,15 +264,26 @@ This work consists of the file  teachingtools.dtx
 %    \begin{macrocode}
 \cs_new:Nn \@@_print_question_label: {
   \str_clear_new:N \l_@@_question_label_str
-  \tl_clear_new:N \l_@@_question_label_format_tl
   \bool_if:NT \l_@@_question_prefix_bool {
     \str_put_right:Nx \l_@@_question_label_str { \l_@@_question_prefix_tl }
     \str_put_right:Nx \l_@@_question_label_str { \l_@@_prefix_separator_str }
-    \tl_put_right:NV \l_@@_question_label_format_tl { \l_@@_question_prefix_tl }
-    \tl_put_right:NV \l_@@_question_label_format_tl { \l_@@_prefix_separator_str }
   }
   \str_put_right:Nx \l_@@_question_label_str { \l_@@_question_label_tl }
-  \tl_put_right:NV \l_@@_question_label_format_tl { \l_@@_question_label_tl }
+}
+%    \end{macrocode}
+%\end{macro}
+%
+%\begin{macro}{ \@@_generate_question_label_format: }
+% This function generates the label format for use in references.
+%    \begin{macrocode}
+\tl_new:N \g_@@_question_label_format_tl
+\cs_new:Nn \@@_generate_question_label_format: {
+  \tl_gclear:N \g_@@_question_label_format_tl
+  \bool_if:NT \l_@@_question_prefix_bool {
+    \tl_gput_right:NV \g_@@_question_label_format_tl { \l_@@_question_prefix_tl }
+    \tl_gput_right:NV \g_@@_question_label_format_tl { \l_@@_prefix_separator_str }
+  }
+  \tl_gput_right:NV \g_@@_question_label_format_tl { \l_@@_question_label_tl }
 }
 %    \end{macrocode}
 %\end{macro}
@@ -749,7 +764,6 @@ This work consists of the file  teachingtools.dtx
 % starred version is unnumbered and does not increment the question counter.
 %    \begin{macrocode}
 \NewDocumentEnvironment { question } { s O { } } {
-  \group_begin:
   \IfBooleanTF #1 
     { \bool_set_false:N \l_@@_numbered_question_bool }
     { \bool_set_true:N \l_@@_numbered_question_bool }
@@ -757,9 +771,9 @@ This work consists of the file  teachingtools.dtx
   \keys_set:nn { teachingtools / question } {#2}
   \@@_print_question:
   
-  \begin{itshape}
+  \itshape
 }
-{\end{itshape}\group_end: \par \skip_vertical:N \l_@@_questionafter_skip}
+{ \par \skip_vertical:N \l_@@_questionafter_skip }
 \cs_new:cpn {question*} {\question*}
 \cs_new_eq:cN {endquestion*} \endquestion
 %    \end{macrocode}
@@ -814,9 +828,11 @@ This work consists of the file  teachingtools.dtx
 %
 % \subsection{Loading configuration}
 %
-% Apply the settings given at load time.
+% Apply the settings given at load time, and generate the initial label formats.
 %    \begin{macrocode}
 \ProcessKeysOptions { teachingtools }
+\@@_generate_question_label_format:
+\renewcommand\thequestion{ \g_@@_question_label_format_tl }
 %    \end{macrocode}
 %
 %    \begin{macrocode}
