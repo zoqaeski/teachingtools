@@ -27,9 +27,9 @@
 \ttsetup{
   % example-label = upper-alph,
   question / label = lower-alph,
-  question / prefix = section,
+  question / prefix = subsection,
   % question / reset = none,
-  % prefix-separator = dash,
+  prefix-separator = dot,
   % reset-all = none,
   % suffix-character = bracket,
 }
@@ -66,6 +66,10 @@ The question in a section
 \begin{question}
 The question in a subsection
 \end{question}
+
+\begin{question*}
+An unnumbered question
+\end{question*}
 
 \begin{question}[label = lower-roman]\label{qu:test2}
 Another question in a subsection

@@ -227,6 +227,16 @@ This work consists of the file  teachingtools.dtx
 %    \end{macrocode}
 %\end{macro}
 %
+% \subsection{Variants}
+% 
+% We need to generate some variants of kernel commands.
+%
+%\begin{macro}
+%    \begin{macrocode}
+\cs_generate_variant:Nn \keys_set:nn { nx }
+%    \end{macrocode}
+%\end{macro}
+%
 % \subsection{Printing routines}
 %
 % Some general-purpose printing routines are provided here to ensure that text
@@ -311,6 +321,13 @@ This work consists of the file  teachingtools.dtx
 }
 %    \end{macrocode}
 %\end{macro}
+
+\keys_define:nn { teachingtools / question } {
+  numbered .bool_set:N = \l_@@_numbered_question_bool,
+  numbered .default:n = true,
+  numbered .initial:n = true,
+}
+
 %
 % \subsection{Resetting counters}
 %\begin{macro}{\l_@@_reset_question_tl}
@@ -354,38 +371,12 @@ This work consists of the file  teachingtools.dtx
 %
 %    \begin{macrocode}
 \keys_define:nn { teachingtools } {
-  reset .choice:,
-  reset / part .meta:n = {
-    question / reset = part,
-    example / reset = part
-  },
-  reset / chapter .meta:n = {
-    question / reset = chapter,
-    example / reset = chapter
-  },
-  reset / section .meta:n = {
-    question / reset = section,
-    example / reset = section
-  },
-  reset / subsection .meta:n = {
-    question / reset = subsection,
-    example / reset = subsection
-  },
-  reset / subsubsection .meta:n = {
-    question / reset = subsubsection,
-    example / reset = subsubsection
-  },
-  reset / paragraph .meta:n = {
-    question / reset = paragraph,
-    example / reset = paragraph
-  },
-  reset / subparagraph .meta:n = {
-    question / reset = subparagraph,
-    example / reset = subparagraph
-  },
-  reset / none .meta:n = {
-    question / reset = none,
-    example / reset = none
+  reset .choices:nn = {
+    part, chapter, section, subsection, subsubsection, paragraph, subparagraph, none
+  }
+  {
+    \keys_set:nx { teachingtools } { question / reset = \l_keys_choice_tl }
+    \keys_set:nx { teachingtools } { example / reset = \l_keys_choice_tl }
   },
   reset / false .meta:n = {
     question / reset,
@@ -399,15 +390,12 @@ This work consists of the file  teachingtools.dtx
 %\end{macro}
 %\end{macro}
 %
-%\begin{macro}{\l_@@_numbered_question_bool}
 %\begin{macro}{\l_@@_numbered_example_bool}
 % This local variable is used to toggle between numbered and unnumbered
 % questions.
 %    \begin{macrocode}
-\bool_new:N \l_@@_numbered_question_bool
 \bool_new:N \l_@@_numbered_example_bool
 %    \end{macrocode}
-%\end{macro}
 %\end{macro}
 %
 %\begin{macro}{\l_@@_question_number_int}
@@ -486,61 +474,13 @@ This work consists of the file  teachingtools.dtx
 \tl_new:N \l_@@_question_prefix_tl
 \bool_new:N \l_@@_question_prefix_bool
 \keys_define:nn { teachingtools / question } {
-  prefix .choice:, 
-  prefix / part .code:n = {
-    \tl_set:Nn \l_@@_question_prefix_tl { \thepart }
-    \keys_set:nn { teachingtools } { 
-      question / reset = part,
-      prefix-separator = dash,
-    }
-    \bool_set_true:N \l_@@_question_prefix_bool
-  },
-  prefix / chapter .code:n = {
-    \tl_set:Nn \l_@@_question_prefix_tl { \thechapter }
-    \keys_set:nn { teachingtools } { 
-      question / reset = chapter,
-      prefix-separator = dash,
-    }
-    \bool_set_true:N \l_@@_question_prefix_bool
-  },
-  prefix / section .code:n = {
-    \tl_set:Nn \l_@@_question_prefix_tl { \thesection }
-    \keys_set:nn { teachingtools } {
-      question / reset = section,
-      prefix-separator = dash,
-    }
-    \bool_set_true:N \l_@@_question_prefix_bool
-  },
-  prefix / subsection .code:n = {
-    \tl_set:Nn \l_@@_question_prefix_tl { \thesubsection }
-    \keys_set:nn { teachingtools } {
-      question / reset = subsection,
-      prefix-separator = dash,
-    }
-    \bool_set_true:N \l_@@_question_prefix_bool
-  },
-  prefix / subsubsection .code:n = {
-    \tl_set:Nn \l_@@_question_prefix_tl { \thesubsubsection }
-    \keys_set:nn { teachingtools } {
-      question / reset = subsubsection,
-      prefix-separator = dash,
-    }
-    \bool_set_true:N \l_@@_question_prefix_bool
-  },
-  prefix / paragraph .code:n = {
-    \tl_set:Nn \l_@@_question_prefix_tl { \theparagraph }
-    \keys_set:nn { teachingtools } {
-      question / reset = paragraph,
-      prefix-separator = dash,
-    }
-    \bool_set_true:N \l_@@_question_prefix_bool
-  },
-  prefix / subparagraph .code:n = {
-    \tl_set:Nn \l_@@_question_prefix_tl { \thesubparagraph }
-    \keys_set:nn { teachingtools } {
-      question / reset = subparagraph,
-      prefix-separator = dash,
-    }
+  prefix .choices:nn = {
+    part, chapter, section, subsection, subsubsection, paragraph, subparagraph
+  }
+  {
+    \tl_set:No \l_@@_question_prefix_tl { \use:c { the \tl_use:N \l_keys_choice_tl } }
+    \keys_set:nx { teachingtools } { question / reset = \l_keys_choice_tl }
+    \keys_set:nn { teachingtools } { prefix-separator = dash }
     \bool_set_true:N \l_@@_question_prefix_bool
   },
   prefix / none .code:n = {
@@ -763,19 +703,23 @@ This work consists of the file  teachingtools.dtx
 % The \cs{question} environment is used to create a list of questions.  The
 % starred version is unnumbered and does not increment the question counter.
 %    \begin{macrocode}
-\NewDocumentEnvironment { question } { s O { } } {
-  \IfBooleanTF #1 
-    { \bool_set_false:N \l_@@_numbered_question_bool }
-    { \bool_set_true:N \l_@@_numbered_question_bool }
+\NewDocumentEnvironment { question } { O { } } {
 
-  \keys_set:nn { teachingtools / question } {#2}
+  \keys_set:nn { teachingtools / question } {#1}
   \@@_print_question:
   
   \itshape
 }
 { \par \skip_vertical:N \l_@@_questionafter_skip }
-\cs_new:cpn {question*} {\question*}
-\cs_new_eq:cN {endquestion*} \endquestion
+\NewDocumentEnvironment { question* } { O { } } {
+
+  \keys_set:nn { teachingtools / question } { numbered = false }
+  \keys_set:nn { teachingtools / question } {#1}
+  \@@_print_question:
+  
+  \itshape
+}
+{ \par \skip_vertical:N \l_@@_questionafter_skip }
 %    \end{macrocode}
 %\end{environment}
 %

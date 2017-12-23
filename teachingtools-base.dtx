@@ -1,0 +1,115 @@
+% \iffalse meta-comment
+%
+% File: teachingtools-base.dtx Copyright (C) 2017 Robbie Smith
+%
+% It may be distributed and/or modified under the conditions of the
+% LaTeX Project Public License (LPPL), either version 1.3c of this
+% license or (at your option) any later version.  The latest version
+% of this license is in the file
+%
+%    https://www.latex-project.org/lppl.txt
+%
+% This file is part of the "teachingtools bundle" (The Work in LPPL)
+% and all files in that bundle must be distributed together.
+%
+% -----------------------------------------------------------------------
+%
+% The development version of the bundle can be found at
+%
+%    https://github.com/zoqaeski/teachingtools
+%
+% for those people who are interested.
+%
+% -----------------------------------------------------------------------
+%
+%<*driver>
+\documentclass{l3doc}
+% The next line is needed so that \GetFileInfo will be able to pick up
+% version data
+\usepackage{teachingtools}
+\begin{document}
+  \DocInput{\jobname.dtx}
+\end{document}
+%</driver>
+% \fi
+%
+% \GetFileInfo{teachingtools.sty}
+%
+% \title{^^A
+%   \pkg{teachingtools} -- Overall set up^^A
+%   \thanks{This file describes \fileversion,
+%     last revised \filedate.}^^A
+% }
+%
+% \author{^^A
+%  Robbie Smith^^A
+%  \thanks{^^A
+%    E-mail:
+%    \href{mailto:zoqaeski@gmail.com}
+%      {zoqaeski@gmail.com}^^A
+%   }^^A
+% }
+%
+% \date{Released \filedate}
+%
+% \maketitle
+%
+%\begin{documentation}
+%
+%\end{documentation}
+%
+%\begin{implementation}
+%
+% \section{\pkg{teachingtools} implementation}
+%
+% Start the \pkg{DocStrip} guards.
+%    \begin{macrocode}
+%<*package>
+%    \end{macrocode}
+%
+% Identify the internal prefix (\LaTeX3 \pkg{DocStrip} convention).
+%    \begin{macrocode}
+%<@@=teachingtools>
+%    \end{macrocode}
+%
+% \subsection{Initial set up}
+%
+% Load only the essential support (\pkg{expl3}) \enquote{up-front}.
+%    \begin{macrocode}
+\RequirePackage{expl3}
+%    \end{macrocode}
+%
+% Make sure that the version of \pkg{l3kernel} in use is sufficiently new.
+% This will also trap any problems with \pkg{l3packages} (as the two are now
+% tied together, version-wise).
+%    \begin{macrocode}
+\@ifpackagelater {expl3}{2015/11/15}
+  {}
+  {%
+    \PackageError{siunitx} {Support package expl3 too old}
+      {%
+        You need to update your installation of the bundles 'l3kernel' and
+        'l3packages'.\MessageBreak
+        Loading~ teachingtools~ will~ abort!%
+      }%
+    \endinput
+  }%
+%    \end{macrocode}
+%
+% Identify the package and give the over all version information.
+%    \begin{macrocode}
+\ProvidesExplPackage {teachingtools} {2017/12/23} {0.5a}
+  {Environments and tools for teaching materials}
+%    \end{macrocode}
+%
+% \subsection{Temporary variables and scratch space}
+% 
+% 
+%
+%    \begin{macrocode}
+%</package>
+%    \end{macrocode}
+%
+% \end{implementation}
+%
+% \PrintIndex

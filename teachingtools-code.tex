@@ -1,0 +1,86 @@
+\iffalse meta-comment
+
+File: teachingtools-code.tex Copyright (C) 2017–2018 Robbie Smith
+
+It may be distributed and/or modified under the conditions of the
+LaTeX Project Public License (LPPL), either version 1.3c of this
+license or (at your option) any later version.  The latest version
+of this license is in the file
+
+   https://www.latex-project.org/lppl.txt
+
+This file is part of the "teachingtools bundle" (The Work in LPPL)
+and all files in that bundle must be distributed together.
+
+-----------------------------------------------------------------------
+
+The development version of the bundle can be found at
+
+   https://github.com/zoqaeski/teachingtools
+
+for those people who are interested.
+
+-----------------------------------------------------------------------
+
+\fi
+
+\documentclass{l3doc}
+
+% This preamble was adapted from Joseph Wright's siunitx-v3.
+
+% The next line is needed so that \GetFileInfo will be able to pick up
+% version data.
+\usepackage{teachingtools}
+
+\usepackage{xparse}
+\NewDocumentCommand\foreign{m}{\emph{#1}}
+
+\begin{document}
+
+\GetFileInfo{teachingtools.sty}
+
+\title{%
+  \textsf{teachingtools} --- Environments and tools for teaching materials \thanks{%
+    This file describes \fileversion, last revised \filedate.%
+  }%
+}
+\author{%
+  Robbie Smith\thanks
+    {%
+      E-mail: \href{mailto:zoqaeski@gmail.com}
+      {\texttt{zoqaeski@gmail.com}}%
+    }%
+}
+\date{Released \filedate}
+
+\pagenumbering{roman}
+
+\maketitle
+\tableofcontents
+\clearpage
+\pagenumbering{arabic}
+
+% Make the separate source files into a single whole, format-wise
+\makeatletter
+\RenewDocumentCommand\maketitle{}{%
+  \clearpage
+  \part{\@title}%
+}
+\makeatother
+\renewcommand*\partname{Part}
+\DeclareExpandableDocumentCommand\thanks{m}{}
+
+\let\DelayPrintIndex\PrintIndex
+\RenewDocumentCommand\PrintIndex{}{}
+
+\DocInput{teachingtools-base.dtx}
+% \DocInput{teachingtools-properties.dtx}
+\DocInput{teachingtools-environments.dtx}
+% \DocInput{teachingtools-grades.dtx}
+% \DocInput{teachingtools-interface.dtx}
+\DocInput{teachingtools-obsolete.dtx}
+\clearpage
+
+\DelayPrintIndex
+
+\end{document}

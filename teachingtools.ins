@@ -1,20 +1,30 @@
-%%
-%% This is file `teachingtools.ins',
-%% generated with the docstrip utility.
-%%
-%% The original source files were:
-%%
-%% teachingtools.dtx  (with options: `install')
-%% ---------------------------------------------------------------
-%% The teachingtools package --- Environments and tools for teaching materials
-%% Maintained by Robbie Smith
-%% E-mail: zoqaeski AT gmail DOT com
-%% Released under the LaTeX Project Public License v1.3c or later
-%% See http://www.latex-project.org/lppl.txt
-%% ---------------------------------------------------------------
-%% 
+\iffalse meta-comment
+
+ File: teachingtools.ins Copyright (C) 2017 Robbie Smith
+
+It may be distributed and/or modified under the conditions of the
+LaTeX Project Public License (LPPL), either version 1.3c of this
+license or (at your option) any later version.  The latest version
+of this license is in the file
+
+   https://www.latex-project.org/lppl.txt
+
+This file is part of the "teachingtools bundle" (The Work in LPPL)
+and all files in that bundle must be distributed together.
+
+-----------------------------------------------------------------------
+
+The development version of the bundle can be found at
+
+   https://github.com/zoqaeski/teachingtools
+
+for those people who are interested.
+
+-----------------------------------------------------------------------
+
+\fi
+ 
 \input l3docstrip.tex
-\keepsilent
 \askforoverwritefalse
 \preamble
 ---------------------------------------------------------------
@@ -39,31 +49,25 @@ version of this license is in the file:
 This work is "maintained" (as per LPPL maintenance status) by
   Robbie Smith.
 
-This work consists of the file  teachingtools.dtx
-          and the derived files teachingtools.pdf,
-                                teachingtools.sty and
-                                teachingtools.ins.
+This work consists of the file  teachingtools-code.tex,
+                                teachingtools-base.dtx,
+                                teachingtools-environments.dtx,
+								teachingtools-obsolete.dtx and
+								teachingtools.ins
+          and the derived files teachingtools.pdf and
+                                teachingtools.sty
 \endpostamble
-\usedir{tex/latex/teachingtools}
-\generate{
-  \file{\jobname.sty}{\from{\jobname.dtx}{package}}
-}
+
+\keepsilent
+
+\generate
+  {%
+    \file{teachingtools.sty}
+      {%
+        \from{teachingtools-base.dtx}         {package}
+        \from{teachingtools-environments.dtx} {package}
+        \from{teachingtools-obsolete.dtx}     {package}
+      }%
+  }
+
 \endbatchfile
-%% Copyright (C) 2017 by
-%%   Robbie Smith <zoqaeski AT gmail DOT com>
-%% 
-%% It may be distributed and/or modified under the conditions of
-%% the LaTeX Project Public License (LPPL), either version 1.3c of
-%% this license or (at your option) any later version.  The latest
-%% version of this license is in the file:
-%%    http://www.latex-project.org/lppl.txt
-%% 
-%% This work is "maintained" (as per LPPL maintenance status) by
-%%   Robbie Smith.
-%% 
-%% This work consists of the file  teachingtools.dtx
-%%           and the derived files teachingtools.pdf,
-%%                                 teachingtools.sty and
-%%                                 teachingtools.ins.
-%%
-%% End of file `teachingtools.ins'.
